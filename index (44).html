@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="El Juego de Jim">
+<meta name="theme-color" content="#c0392b">
+<title>El Juego de Jim</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='60' fill='%23c0392b'/%3E%3Crect y='60' width='180' height='60' fill='%23f1c40f'/%3E%3Crect y='120' width='180' height='60' fill='%23c0392b'/%3E%3Ctext x='90' y='125' font-family='Georgia,serif' font-size='100' font-weight='900' fill='white' text-anchor='middle' opacity='0.95'%3EJ%3C/text%3E%3C/svg%3E">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:rgba(0,0,0,0);}
+:root{
+  --bg:#f7f2ea;--card:rgba(255,252,245,0.92);--border:#d4a96a;--gold:#e8822a;--sun:#f5c842;
+  --sea:#1a7ab5;--sea-lt:#c8e8f8;--terracotta:#c0392b;--terra-dk:#9b2d23;
+  --green:#1a7a2a;--dkgreen:#155a1f;--ltgreen:#edfaef;--red:#c0392b;--text:#1a0800;--muted:#7a5040;
+  --font-body:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+  --font-title:Georgia,'Times New Roman',serif;
+}
+html,body{width:100%;height:100%;height:100dvh;overflow:hidden;font-family:var(--font-body);color:var(--text);}
+body{background:linear-gradient(180deg,#5bb8f5 0%,#87ceeb 18%,#f0ede5 35%,#f7f2ea 55%,#ede5d8 75%,#c8e8f8 88%,#1a7ab5 100%);background-attachment:fixed;}
+
+/* HEADER */
+#hdr{position:fixed;top:0;left:0;right:0;z-index:100;background:linear-gradient(135deg,#c0392b 0%,#9b2d23 100%);border-bottom:3px solid var(--sun);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;height:52px;box-shadow:0 2px 12px rgba(0,0,0,.25);}
+.logo{font-family:var(--font-title);font-size:1.05rem;font-weight:900;letter-spacing:.12em;}
+.logo .t{color:var(--sun);}.logo .i{color:#fff;}.logo .sep{color:var(--sun);margin:0 4px;}
+#livesDisplay{display:flex;gap:4px;font-size:1rem;}
+.life{transition:opacity .3s;}.life.empty{opacity:.2;filter:grayscale(1);}
+
+/* SCREENS */
+.screen{position:fixed;top:52px;left:0;right:0;bottom:0;overflow-y:auto;-webkit-overflow-scrolling:touch;background:transparent;display:none;padding:16px 16px 60px;}
+
+/* BUTTONS */
+.btn{display:block;width:100%;padding:14px 16px;border:none;border-radius:11px;font-family:var(--font-body);font-size:.93rem;font-weight:700;cursor:pointer;text-align:center;-webkit-appearance:none;appearance:none;touch-action:manipulation;transition:opacity .12s,transform .1s;}
+.btn:active{opacity:.8;transform:scale(.98);}
+.btn-p{background:linear-gradient(135deg,#c0392b,#9b2d23);color:#fff;box-shadow:0 3px 10px rgba(192,57,43,.35);}
+.btn-s{background:rgba(255,252,245,0.85);border:1.5px solid var(--border);color:var(--muted);backdrop-filter:blur(4px);}
+.btn-s:active{border-color:var(--terracotta);}
+.btn-stack{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
+
+/* HOME */
+#homeIcon{font-size:4.5rem;text-align:center;margin:24px 0 6px;filter:drop-shadow(0 3px 8px rgba(0,0,0,.15));}
+#homeTitle{font-family:var(--font-title);font-size:1.45rem;text-align:center;letter-spacing:.14em;color:var(--terracotta);text-shadow:0 1px 4px rgba(0,0,0,.1);}
+#homeSub{font-size:.68rem;text-align:center;color:var(--sea);letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px;font-weight:700;}
+#badgeRow{font-size:1.4rem;letter-spacing:6px;text-align:center;min-height:2rem;margin-bottom:8px;}
+#homeMsg{font-size:.82rem;text-align:center;color:#1a2a10;max-width:300px;margin:0 auto 6px;line-height:1.7;font-style:italic;background:rgba(255,252,245,0.75);border-radius:8px;padding:6px 12px;}
+#homeProverb{font-size:.68rem;text-align:center;color:var(--muted);max-width:300px;margin:0 auto 18px;line-height:1.6;}
+#homeCopy{font-size:.56rem;color:rgba(122,80,64,.55);text-align:center;margin-top:18px;font-style:italic;}
+
+/* LEVELS */
+.lv-row{background:rgba(255,252,245,0.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(212,169,106,0.5);border-radius:13px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:10px;cursor:pointer;touch-action:manipulation;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.lv-row:active{border-color:var(--terracotta);}
+.lv-row.locked{opacity:.35;}
+.lv-row.done{border-color:var(--terracotta);}
+.lv-icon{width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,#ffe8b0,#ffd070);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+.lv-icon.done{background:linear-gradient(135deg,#c0392b,#9b2d23);border-color:#9b2d23;}
+.lv-info{flex:1;}
+.lv-name{font-size:.9rem;font-weight:700;color:var(--text);}
+.lv-desc{font-size:.65rem;color:var(--muted);margin-top:2px;}
+.lv-prog{font-size:.65rem;color:var(--terracotta);margin-top:3px;font-weight:600;}
+
+/* INTRO */
+#introBadge{font-size:4.5rem;text-align:center;margin:16px 0 8px;}
+#introLevel{font-family:var(--font-title);font-size:1.6rem;color:var(--terracotta);text-align:center;letter-spacing:.1em;}
+#introName{font-size:1rem;font-weight:600;text-align:center;margin-bottom:6px;}
+#introDesc{font-size:.8rem;color:var(--muted);text-align:center;line-height:1.7;max-width:280px;margin:0 auto 8px;}
+#introLoops{font-size:.7rem;color:var(--muted);text-align:center;letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px;}
+
+/* GAME */
+#gTop{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+#gInfo{font-family:var(--font-title);font-size:.82rem;color:var(--terracotta);font-weight:700;}
+#gScore{font-size:.78rem;color:var(--muted);}
+#gHomeBtn{font-size:.72rem;color:var(--sea);cursor:pointer;border-bottom:1px solid var(--sea);touch-action:manipulation;padding-bottom:1px;}
+.prog-wrap{width:100%;height:5px;background:rgba(212,169,106,.3);border-radius:3px;margin-bottom:4px;overflow:hidden;}
+.prog-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--terracotta),var(--sun));transition:width .3s;}
+.timer-wrap{width:100%;height:3px;background:rgba(212,169,106,.3);border-radius:2px;margin-bottom:10px;overflow:hidden;}
+#timerBar{height:100%;border-radius:2px;background:var(--sea);transition:width .1s linear,background .3s;}
+.q-card{background:rgba(255,252,245,0.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(212,169,106,0.5);border-radius:13px;padding:14px 16px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.q-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+#qProg{font-size:.62rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+#qType{font-size:.65rem;color:var(--terracotta);border:1px solid var(--terracotta);border-radius:3px;padding:2px 7px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;}
+#bridgeIrish{font-size:1.8rem;font-weight:800;margin-bottom:4px;text-align:center;color:var(--terracotta);}
+#bridgePh{font-size:.72rem;color:var(--muted);font-style:italic;margin-bottom:8px;text-align:center;}
+#qText{font-size:1.1rem;font-weight:600;line-height:1.4;text-align:center;color:var(--text);}
+
+/* MC */
+.mc-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:8px;}
+.mc-btn{background:linear-gradient(135deg,#7a2010,#5a1808);border:1.5px solid #9b3020;border-radius:10px;padding:11px 14px;text-align:left;cursor:pointer;width:100%;font-size:.9rem;font-weight:500;color:#fff;display:flex;flex-direction:column;gap:2px;touch-action:manipulation;-webkit-appearance:none;appearance:none;}
+.mc-btn:active:not(.revealed){opacity:.7;}
+.mc-ph{font-size:.63rem;color:#c8a870;font-style:italic;display:none;}
+.mc-btn.correct{border-color:#1a7a2a;background:rgba(26,122,42,.18);color:#1a7a2a;}
+.mc-btn.correct .mc-ph{display:block;color:#1a7a2a;}
+.mc-btn.wrong{border-color:#c0392b;background:rgba(192,57,43,.12);color:#c0392b;}
+.mc-btn.faded{opacity:.2;}
+#mcHintRow{text-align:center;margin-bottom:6px;display:none;}
+#mcHintBtn{font-size:.72rem;color:var(--terracotta);cursor:pointer;touch-action:manipulation;display:inline-block;padding:4px 8px;}
+
+/* TYPED */
+.typed-wrap{margin-bottom:8px;}
+.typed-input{width:100%;background:rgba(255,252,245,0.92);border:2px solid var(--border);border-radius:10px;padding:12px 14px;font-size:1rem;color:var(--text);font-family:var(--font-body);outline:none;-webkit-appearance:none;appearance:none;transition:border-color .2s;margin-bottom:6px;display:block;}
+.typed-input:focus{border-color:var(--terracotta);}
+.typed-input.ok{border-color:var(--green);}
+.typed-input.bad{border-color:var(--red);}
+.fada-note{font-size:.67rem;color:var(--muted);text-align:center;margin-bottom:8px;}
+.fada-note strong{color:var(--terracotta);}
+#hintBtn{font-size:.72rem;color:var(--terracotta);cursor:pointer;text-align:center;padding:6px 0;touch-action:manipulation;display:block;}
+
+/* DIFF HIGHLIGHT */
+.diff-char{text-decoration:underline;text-decoration-color:#c0392b;text-decoration-thickness:2px;color:#c0392b;font-weight:700;}
+
+/* TTS toggle */
+#ttsToggle{font-size:.68rem;color:var(--sun);cursor:pointer;border:1px solid var(--sun);border-radius:6px;padding:2px 7px;touch-action:manipulation;white-space:nowrap;}
+#ttsToggle.off{color:rgba(255,255,255,.4);border-color:rgba(255,255,255,.3);}
+
+/* Voice btn */
+#voiceBtn{display:none;padding:12px 14px;border:1.5px solid var(--sea);border-radius:10px;background:rgba(26,122,181,.08);color:var(--sea);font-size:.9rem;font-weight:600;font-family:var(--font-body);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;appearance:none;width:100%;margin-bottom:6px;}
+#voiceBtn.listening{background:var(--terracotta);color:#fff;border-color:var(--terracotta);}
+
+/* FEEDBACK */
+#fb{background:rgba(255,252,245,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(212,169,106,0.4);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:none;flex-direction:column;gap:4px;}
+.fb-result{font-size:.95rem;font-weight:700;}
+.fb-result.ok{color:var(--green);}.fb-result.bad{color:var(--red);}
+#fbAns{font-size:.88rem;font-weight:500;}
+#fbPh{font-size:.72rem;color:var(--muted);font-style:italic;}
+#fbBonus{font-size:.6rem;color:var(--sun);font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
+#btnNext{display:none;width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;background:rgba(255,252,245,0.85);color:var(--terracotta);font-size:.9rem;font-weight:600;font-family:var(--font-body);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;appearance:none;}
+#btnNext:active{background:var(--terracotta);color:#fff;}
+
+/* LOOP COMPLETE */
+#loopIcon{font-size:3.5rem;text-align:center;margin:16px 0 6px;}
+#loopTitle{font-family:var(--font-title);font-size:1.3rem;color:var(--terracotta);text-align:center;}
+#loopStars{font-size:1.6rem;letter-spacing:3px;color:var(--sun);text-align:center;margin:4px 0;text-shadow:0 1px 4px rgba(0,0,0,.15);}
+#loopScore{font-size:1.05rem;font-weight:700;text-align:center;color:var(--text);}
+#loopMsg{font-size:.88rem;color:var(--muted);text-align:center;line-height:1.6;max-width:260px;margin:4px auto;}
+#loopLife{font-size:.95rem;font-weight:700;color:var(--terracotta);text-align:center;margin:6px 0;}
+#loopNotice{background:rgba(255,248,220,0.9);border:1px solid var(--sun);border-radius:10px;padding:12px;font-size:.8rem;color:#5a3a0a;line-height:1.8;margin-bottom:4px;display:none;}
+
+/* LOOP SUMMARY */
+#loopSummary,#loopSummaryBoss{background:rgba(255,252,245,0.9);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(212,169,106,0.45);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:none;}
+#loopSummary .sum-title,#loopSummaryBoss .sum-title{font-size:.72rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;font-weight:700;}
+.sum-row{font-size:.82rem;padding:4px 0;border-bottom:1px solid rgba(212,169,106,.25);display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+.sum-row:last-child{border-bottom:none;}
+.sum-q{color:var(--muted);font-size:.75rem;flex-shrink:0;max-width:45%;}
+
+/* BOSS INTRO */
+#bossIntroTitle{font-family:var(--font-title);font-size:1.4rem;color:var(--terracotta);text-align:center;margin:16px 0 8px;letter-spacing:.06em;}
+#bossIntroDesc{font-size:.8rem;color:#2a3a1a;text-align:center;max-width:300px;margin:0 auto 14px;line-height:1.7;}
+#bossRulesCard{background:rgba(255,252,245,0.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(212,169,106,0.5);border-radius:12px;padding:16px;margin-bottom:14px;}
+#bossRulesTitle{font-size:.7rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;text-align:center;}
+#bossRules{font-size:.82rem;color:var(--text);line-height:1.9;}
+#bossTargetMsg{font-size:.72rem;color:var(--sea);font-style:italic;text-align:center;margin-bottom:14px;font-weight:600;}
+
+/* BOSS GAME */
+#bossMeta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+#bossLvlName{font-family:var(--font-title);font-size:.82rem;color:var(--terracotta);font-weight:700;}
+#bossTime{font-size:.9rem;font-weight:700;}
+#bossPenalty{font-size:.72rem;color:var(--red);font-weight:700;}
+#bossProgWrap{width:100%;height:5px;background:rgba(212,169,106,.3);border-radius:3px;margin-bottom:12px;overflow:hidden;}
+#bossProgBar{height:100%;background:linear-gradient(90deg,var(--terracotta),var(--sun));border-radius:3px;transition:width .3s;}
+#bossQCard{background:rgba(255,252,245,0.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(212,169,106,0.5);border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+#bossQMeta{display:flex;justify-content:space-between;margin-bottom:6px;}
+#bossQProg{font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;font-weight:600;}
+#bossQType{font-size:.65rem;color:var(--terracotta);border:1px solid var(--terracotta);border-radius:3px;padding:2px 7px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;}
+#bossQText{font-size:1.1rem;font-weight:600;line-height:1.35;text-align:center;color:var(--text);}
+#bossInput{width:100%;background:rgba(255,252,245,0.92);border:2px solid var(--terracotta);border-radius:10px;padding:13px 14px;font-size:1rem;color:var(--text);font-family:var(--font-body);outline:none;-webkit-appearance:none;appearance:none;margin-bottom:8px;display:block;}
+#bossHintWrap{background:rgba(255,248,220,0.88);border:2px solid var(--terracotta);border-radius:10px;padding:12px;margin-bottom:10px;}
+#bossHintTitle{font-size:.73rem;color:var(--terracotta);font-weight:700;margin-bottom:8px;text-align:center;}
+#vowelBtns{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;}
+.vowel-btn{min-width:44px;padding:10px 8px;border-radius:8px;border:2px solid var(--sun);background:linear-gradient(135deg,#c0392b,#9b2d23);color:#fff;font-size:1rem;font-weight:800;cursor:pointer;font-family:var(--font-body);touch-action:manipulation;-webkit-appearance:none;appearance:none;}
+.vowel-btn:active{opacity:.7;}
+.vowel-btn.used{border-color:var(--border);background:rgba(255,252,245,.8);color:var(--muted);}
+#bossFb{background:rgba(255,252,245,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(212,169,106,0.4);border-radius:10px;padding:12px;display:none;flex-direction:column;gap:4px;margin-bottom:10px;}
+#bossFbResult{font-size:.95rem;font-weight:700;}
+#bossFbAns{font-size:.88rem;font-weight:500;}
+#bossFbPh{font-size:.73rem;color:var(--muted);font-style:italic;}
+#bossFbPenalty{font-size:.72rem;color:var(--red);font-weight:700;}
+#bossNextBtn{display:none;width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;background:rgba(255,252,245,0.85);color:var(--terracotta);font-size:.9rem;font-weight:600;font-family:var(--font-body);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;appearance:none;}
+#bossNextBtn:active{background:var(--terracotta);color:#fff;}
+
+/* BOSS RESULTS */
+#bossResIcon{font-size:4.5rem;text-align:center;margin:20px 0 10px;}
+#bossResTitle{font-family:var(--font-title);font-size:1.4rem;color:var(--terracotta);text-align:center;margin-bottom:14px;}
+#bossResCard{background:rgba(255,252,245,0.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(212,169,106,0.5);border-radius:12px;padding:20px;text-align:center;margin-bottom:14px;}
+#bossResTime{font-size:2.2rem;font-weight:900;font-family:var(--font-title);color:var(--terracotta);}
+#bossResTimeLabel{font-size:.7rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;}
+#bossResBreak{font-size:.82rem;color:#2a3a1a;line-height:1.9;}
+#bossResMsg{font-size:.9rem;font-weight:500;text-align:center;max-width:280px;margin:0 auto 8px;line-height:1.6;}
+#bossResIrish{font-size:.8rem;color:var(--muted);font-style:italic;text-align:center;margin-bottom:14px;}
+
+/* BADGE */
+@keyframes glow{from{opacity:.6}to{opacity:1;text-shadow:0 0 14px var(--sun);}}
+@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.08);}}
+#badgeCelebration{font-size:.72rem;color:var(--terracotta);letter-spacing:.15em;text-transform:uppercase;font-weight:700;text-align:center;animation:glow 1.2s ease-in-out infinite alternate;margin:16px 0 8px;}
+#badgeBig{font-size:5.5rem;text-align:center;animation:pulse 1.2s ease-in-out infinite alternate;filter:drop-shadow(0 0 20px rgba(232,130,42,.5));line-height:1.2;}
+#badgeDivider{width:60px;height:3px;background:linear-gradient(90deg,var(--terracotta),var(--sun));border-radius:1px;margin:10px auto;}
+#badgeLevel{font-family:var(--font-title);font-size:1.5rem;color:var(--terracotta);text-align:center;letter-spacing:.1em;}
+#badgeName{font-family:var(--font-title);font-size:1.1rem;text-align:center;letter-spacing:.06em;margin-bottom:6px;}
+#badgeMeaning{font-size:.85rem;color:var(--muted);text-align:center;max-width:280px;margin:0 auto 8px;line-height:1.7;font-style:italic;}
+#badgeProverb{font-size:.8rem;color:var(--muted);font-style:italic;text-align:center;max-width:260px;margin:0 auto 4px;line-height:1.6;}
+#badgeNext{font-size:.78rem;color:var(--sea);text-align:center;margin-bottom:14px;font-weight:600;}
+
+/* LIVES */
+#livesHeader{text-align:center;margin-bottom:16px;}
+.screen-title{font-family:var(--font-title);font-size:1rem;color:var(--terracotta);font-weight:700;margin-bottom:14px;text-align:center;}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <div class="logo"><span class="t">EL JUEGO</span><span class="sep">✦</span><span class="i">DE JIM</span></div>
+  <div id="livesDisplay"></div>
+</div>
+
+<div class="screen" id="homeScreen" style="display:block">
+  <div id="homeIcon">🌑</div>
+  <div id="homeTitle">EL JUEGO DE JIM</div>
+  <div id="homeSub">☀️ Cádiz · This Summer · Vamos ☀️</div>
+  <div id="badgeRow"></div>
+  <div id="homeMsg"></div>
+  <div id="homeProverb"></div>
+  <div class="btn-stack">
+    <button class="btn btn-p" id="homeStartBtn">¡Empieza! · Vamos!</button>
+    <button class="btn btn-s" id="homeLevelsBtn" style="display:none">Niveles · All Levels</button>
+    <button class="btn btn-s" id="homeLivesBtn" style="display:none">💛 Vidas · Lives</button>
+  </div>
+  <div id="homeCopy">© 2026 El Juego de Jim · ¡Imagination and Perseverance!</div>
+</div>
+
+<div class="screen" id="levelsScreen">
+  <div class="screen-title">Niveles · Levels</div>
+  <div id="levelsWrap"></div>
+  <div class="btn-stack"><button class="btn btn-s" id="levelsBackBtn">← Volver · Back</button></div>
+</div>
+
+<div class="screen" id="introScreen">
+  <div id="introBadge"></div>
+  <div id="introLevel"></div>
+  <div id="introName"></div>
+  <div id="introDesc"></div>
+  <div id="introLoops"></div>
+  <div class="btn-stack">
+    <button class="btn btn-p" id="introStartBtn">¡Vamos! → Begin</button>
+    <button class="btn btn-s" id="introBackBtn">← Volver · Back</button>
+  </div>
+</div>
+
+<div class="screen" id="gameScreen">
+  <div id="gTop">
+    <div id="gInfo"></div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div id="ttsToggle">🔊 Read</div>
+      <div id="gScore">★ <span id="gStars">0</span></div>
+      <div id="gHomeBtn">← Inicio</div>
+    </div>
+  </div>
+  <div class="prog-wrap"><div class="prog-bar" id="progressBar" style="width:0%"></div></div>
+  <div class="timer-wrap"><div id="timerBar"></div></div>
+  <div class="q-card">
+    <div class="q-meta"><div id="qProg"></div><div id="qType"></div></div>
+    <div id="bridgeIrish" style="display:none"></div>
+    <div id="bridgePh" style="display:none"></div>
+    <div id="qText"></div>
+  </div>
+  <div id="mcHintRow"><span id="mcHintBtn">💡 Pista · Hint (<span id="mcHintLives">5</span>) — costs 1 life</span></div>
+  <div class="mc-wrap" id="mcWrap" style="display:none"></div>
+  <div class="typed-wrap" id="typedWrap" style="display:none">
+    <input class="typed-input" id="typedInput" type="text" placeholder="Escribe aquí…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <div class="fada-note">Acentos opcionales — <strong>★★★</strong> si los usas</div>
+    <button id="voiceBtn">🎤 Di la respuesta · Speak</button>
+    <button class="btn btn-p" id="submitBtn">Enviar → · Send</button>
+    <div id="hintBtn">💡 Pista · Hint (<span id="hintLives">5</span>) — costs 1 life</div>
+  </div>
+  <div id="fb">
+    <div class="fb-result" id="fbResult"></div>
+    <div id="fbAns"></div>
+    <div id="fbPh"></div>
+    <div id="fbBonus"></div>
+  </div>
+  <button id="btnNext">Siguiente → · Continue</button>
+</div>
+
+<div class="screen" id="loopScreen">
+  <div id="loopIcon"></div>
+  <div id="loopTitle"></div>
+  <div id="loopStars"></div>
+  <div id="loopScore"></div>
+  <div id="loopMsg"></div>
+  <div id="loopLife"></div>
+  <div id="loopSummary"><div class="sum-title">📋 Repaso · Round Summary</div><div id="loopSummaryRows"></div></div>
+  <div id="loopNotice"></div>
+  <div class="btn-stack" id="loopBtns"></div>
+</div>
+
+<div class="screen" id="bossIntroScreen">
+  <div style="font-size:3rem;text-align:center;margin:16px 0 8px;">⚔️</div>
+  <div id="bossIntroTitle"></div>
+  <div id="bossIntroDesc"></div>
+  <div id="bossRulesCard">
+    <div id="bossRulesTitle">Na Rialacha · The Rules</div>
+    <div id="bossRules"></div>
+  </div>
+  <div id="bossTargetMsg"></div>
+  <div class="btn-stack">
+    <button class="btn btn-p" id="bossBeginBtn">⚔️ ¡Al ataque! · Begin</button>
+    <button class="btn btn-s" id="bossLivesBtn">💛 Ganar más vidas → repite rondas</button>
+    <button class="btn btn-s" id="bossIntroBackBtn">← Volver · Back</button>
+  </div>
+</div>
+
+<div class="screen" id="bossScreen">
+  <div id="bossMeta">
+    <div id="bossLvlName"></div>
+    <div style="display:flex;align-items:center;gap:8px;"><div id="bossTime">0:00</div><div id="bossPenalty"></div></div>
+  </div>
+  <div id="bossProgWrap"><div id="bossProgBar" style="width:0%"></div></div>
+  <div id="bossQCard">
+    <div id="bossQMeta"><div id="bossQProg"></div><div id="bossQType">Escribe · Write</div></div>
+    <div id="bossQText"></div>
+  </div>
+  <input id="bossInput" type="text" placeholder="Escribe aquí…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <button class="btn btn-p" id="bossSubmitBtn">Enviar → · Submit</button>
+  <div id="bossHintWrap">
+    <div id="bossHintTitle">💛 Pista · Elige una vocal · cuesta 1 vida · sin penalización · <span id="bossHintLives"></span> left</div>
+    <div id="vowelBtns"></div>
+  </div>
+  <div id="bossFb">
+    <div id="bossFbResult"></div>
+    <div id="bossFbAns"></div>
+    <div id="bossFbPh"></div>
+    <div id="bossFbPenalty"></div>
+  </div>
+  <button id="bossNextBtn">Siguiente → · Next</button>
+</div>
+
+<div class="screen" id="bossResultsScreen">
+  <div id="bossResIcon"></div>
+  <div id="bossResTitle"></div>
+  <div id="bossResCard">
+    <div id="bossResTime"></div>
+    <div id="bossResTimeLabel">Tiempo · Time</div>
+    <div id="bossResBreak"></div>
+  </div>
+  <div id="bossResMsg"></div>
+  <div id="bossResIrish"></div>
+  <div id="loopSummaryBoss" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:none;"><div class="sum-title">📋 Boss Summary</div><div id="bossSummaryRows"></div></div>
+  <div class="btn-stack" id="bossResBtns"></div>
+</div>
+
+<div class="screen" id="badgeScreen">
+  <div id="badgeCelebration">☀️ ¡Conseguido! · Earned · Deadly ☀️</div>
+  <div id="badgeBig"></div>
+  <div id="badgeDivider"></div>
+  <div id="badgeLevel"></div>
+  <div id="badgeName"></div>
+  <div id="badgeMeaning"></div>
+  <div id="badgeProverb"></div>
+  <div id="badgeNext"></div>
+  <div class="btn-stack" id="badgeBtns"></div>
+</div>
+
+<div class="screen" id="livesScreen">
+  <div id="livesHeader">
+    <div style="font-size:2rem;">💚</div>
+    <div class="screen-title" style="margin-bottom:4px;">Vidas · Lives</div>
+    <div style="font-size:.75rem;color:var(--muted);">Repite cualquier ronda con 20/20 para ganar una vida</div>
+  </div>
+  <div id="livesLoopList"></div>
+  <div class="btn-stack"><button class="btn btn-s" id="livesBackBtn">← Volver · Back</button></div>
+</div>
+
+<script>
+const LEVELS = [
+  {
+    id: 'A1',
+    name: 'Principiante',
+    badge: '🌱',
+    desc: 'Starter · The basics you half-know already',
+    bossTarget: 300,
+    bossPraise: '¡Increíble! A1 is yours, Jim. You walked in knowing nothing and walked out with the basics. Sound out.',
+    badgeIrish: 'El comienzo de algo grande',
+    badgeIrishEn: 'The beginning of something great',
+    loops: [
+      {
+        name: 'Saludos · Greetings',
+        desc: 'Say hello, goodbye, how are you',
+        timeLimit: 18,
+        qs: [
+          { type:'mc', q:"How do you say 'Hello'?", a:'Hola', ph:'OH-lah', opts:['Hola','Adiós','Gracias','Por favor'] },
+          { type:'mc', q:"How do you say 'Goodbye'?", a:'Adiós', ph:'ah-DYOS', opts:['Adiós','Hola','Buenas noches','Hasta luego'] },
+          { type:'mc', q:"How do you say 'See you later'?", a:'Hasta luego', ph:'AS-tah loo-AY-go', opts:['Hasta luego','Adiós','Hasta mañana','Nos vemos'] },
+          { type:'mc', q:"How do you say 'See you tomorrow'?", a:'Hasta mañana', ph:'AS-tah man-YAH-nah', opts:['Hasta mañana','Hasta luego','Nos vemos','Adiós'] },
+          { type:'mc', q:"How do you say 'Good morning'?", a:'Buenos días', ph:'BWAY-nos DEE-as', opts:['Buenos días','Buenas tardes','Buenas noches','Hola'] },
+          { type:'mc', q:"How do you say 'Good afternoon'?", a:'Buenas tardes', ph:'BWAY-nas TAR-des', opts:['Buenas tardes','Buenos días','Buenas noches','Hasta luego'] },
+          { type:'mc', q:"How do you say 'Good night'?", a:'Buenas noches', ph:'BWAY-nas NO-ches', opts:['Buenas noches','Buenas tardes','Buenos días','Adiós'] },
+          { type:'mc', q:"How do you say 'How are you?' (informal)?", a:'¿Qué tal?', ph:'kay TAL', opts:['¿Qué tal?','¿Cómo estás?','¿Qué pasa?','¿Cómo te llamas?'] },
+          { type:'mc', q:"How do you say 'How are you?' (formal)?", a:'¿Cómo está usted?', ph:'KO-mo es-TAH oo-STED', opts:['¿Cómo está usted?','¿Cómo estás?','¿Qué tal?','¿Qué pasa?'] },
+          { type:'mc', q:"How do you say 'Fine, thanks'?", a:'Bien, gracias', ph:'bee-EN GRA-thyus', opts:['Bien, gracias','Muy bien','Más o menos','Regular'] },
+          { type:'mc', q:"How do you say 'Very well'?", a:'Muy bien', ph:'mwee bee-EN', opts:['Muy bien','Bien, gracias','Más o menos','Excelente'] },
+          { type:'mc', q:"How do you say 'Not bad / So-so'?", a:'Más o menos', ph:'mas oh MAY-nos', opts:['Más o menos','Muy bien','Mal','Regular'] },
+          { type:'mc', q:"How do you say 'Please'?", a:'Por favor', ph:'por fah-VOR', opts:['Por favor','Gracias','De nada','Perdón'] },
+          { type:'mc', q:"How do you say 'Thank you'?", a:'Gracias', ph:'GRA-thyus', opts:['Gracias','Por favor','De nada','Perdón'] },
+          { type:'mc', q:"How do you say 'You're welcome'?", a:'De nada', ph:'day NAH-dah', opts:['De nada','Gracias','Por favor','Con mucho gusto'] },
+          { type:'mc', q:"How do you say 'Excuse me / Sorry'?", a:'Perdón', ph:'pair-DON', opts:['Perdón','Disculpe','Lo siento','De nada'] },
+          { type:'mc', q:"How do you say 'I'm sorry'?", a:'Lo siento', ph:'lo SYEN-to', opts:['Lo siento','Perdón','Disculpe','De nada'] },
+          { type:'typed', q:"Write: Hello", a:'Hola', ph:'OH-lah' },
+          { type:'typed', q:"Write: Goodbye", a:'Adiós', ph:'ah-DYOS' },
+          { type:'typed', q:"Write: Thank you", a:'Gracias', ph:'GRA-thyus' },
+          { type:'typed', q:"Write: Please", a:'Por favor', ph:'por fah-VOR' },
+          { type:'typed', q:"Write: You're welcome", a:'De nada', ph:'day NAH-dah' },
+          { type:'typed', q:"Write: Good morning", a:'Buenos días', ph:'BWAY-nos DEE-as' },
+          { type:'typed', q:"Write: Good afternoon", a:'Buenas tardes', ph:'BWAY-nas TAR-des' },
+          { type:'typed', q:"Write: See you later", a:'Hasta luego', ph:'AS-tah loo-AY-go' },
+        ]
+      },
+      {
+        name: 'Presentaciones · Introductions',
+        desc: 'Who you are, where you are from',
+        timeLimit: 18,
+        qs: [
+          { type:'mc', q:"How do you say 'What is your name?'", a:'¿Cómo te llamas?', ph:'KO-mo tay YAH-mas', opts:['¿Cómo te llamas?','¿Cómo estás?','¿De dónde eres?','¿Cuántos años tienes?'] },
+          { type:'mc', q:"How do you say 'My name is Jim'?", a:'Me llamo Jim', ph:'may YAH-mo Jim', opts:['Me llamo Jim','Soy Jim','Mi nombre es Jim','Llamo Jim'] },
+          { type:'mc', q:"How do you say 'Where are you from?'", a:'¿De dónde eres?', ph:'day DON-day EH-res', opts:['¿De dónde eres?','¿Dónde vives?','¿Cómo te llamas?','¿Qué haces?'] },
+          { type:'mc', q:"How do you say 'I am from Ireland'?", a:'Soy de Irlanda', ph:'soy day eer-LAN-dah', opts:['Soy de Irlanda','Soy irlandés','Vengo de Irlanda','Estoy de Irlanda'] },
+          { type:'mc', q:"How do you say 'I am Irish'?", a:'Soy irlandés', ph:'soy eer-lan-DES', opts:['Soy irlandés','Soy de Irlanda','Soy Ireland','Soy irlanda'] },
+          { type:'mc', q:"How do you say 'How old are you?'", a:'¿Cuántos años tienes?', ph:'KWAN-tos AN-yos tee-EN-es', opts:['¿Cuántos años tienes?','¿Cómo te llamas?','¿De dónde eres?','¿Qué edad tienes?'] },
+          { type:'mc', q:"How do you say 'I am 17 years old'?", a:'Tengo diecisiete años', ph:'TEN-go dee-ES-ee-SYET-ay AN-yos', opts:['Tengo diecisiete años','Soy diecisiete años','Tengo diecisiete','Tengo 17 años'] },
+          { type:'mc', q:"How do you say 'Nice to meet you'?", a:'Mucho gusto', ph:'MOO-cho GOO-sto', opts:['Mucho gusto','Encantado','Con mucho gusto','Igualmente'] },
+          { type:'mc', q:"How do you say 'Likewise / Same to you'?", a:'Igualmente', ph:'ee-gwal-MEN-tay', opts:['Igualmente','Mucho gusto','También','Igual'] },
+          { type:'mc', q:"How do you say 'I am a student'?", a:'Soy estudiante', ph:'soy es-too-dee-AN-tay', opts:['Soy estudiante','Estoy estudiante','Soy un estudiante','Tengo estudiante'] },
+          { type:'mc', q:"How do you say 'I speak a little Spanish'?", a:'Hablo un poco de español', ph:'AH-blo oon PO-ko day es-pan-YOL', opts:['Hablo un poco de español','Hablo español poco','Sé un poco español','Hablo poquito'] },
+          { type:'mc', q:"How do you say 'Do you speak English?'", a:'¿Hablas inglés?', ph:'AH-blas een-GLES', opts:['¿Hablas inglés?','¿Sabes inglés?','¿Entiendes inglés?','¿Hablas el inglés?'] },
+          { type:'mc', q:"How do you say 'I don't understand'?", a:'No entiendo', ph:'no en-TYEN-do', opts:['No entiendo','No sé','No comprendo','No hablo'] },
+          { type:'mc', q:"How do you say 'Can you repeat that?'", a:'¿Puedes repetir?', ph:'PWAY-des ray-pay-TEER', opts:['¿Puedes repetir?','¿Puedes repetir eso?','¿Repite por favor?','¿Otra vez?'] },
+          { type:'mc', q:"How do you say 'More slowly please'?", a:'Más despacio, por favor', ph:'mas des-PA-thyoh por fah-VOR', opts:['Más despacio, por favor','Más lento, por favor','Más fácil','Más claro'] },
+          { type:'typed', q:"Write: My name is... (first two words)", a:'Me llamo', ph:'may YAH-mo' },
+          { type:'typed', q:"Write: I am from Ireland", a:'Soy de Irlanda', ph:'soy day eer-LAN-dah' },
+          { type:'typed', q:"Write: Nice to meet you", a:'Mucho gusto', ph:'MOO-cho GOO-sto' },
+          { type:'typed', q:"Write: I don't understand", a:'No entiendo', ph:'no en-TYEN-do' },
+          { type:'typed', q:"Write: I am a student", a:'Soy estudiante', ph:'soy es-too-dee-AN-tay' },
+        ]
+      },
+      {
+        name: 'Números · Numbers 1-20',
+        desc: 'Count to 20',
+        timeLimit: 15,
+        qs: [
+          { type:'mc', q:"How do you say '1'?", a:'uno', ph:'OO-no', opts:['uno','dos','tres','cuatro'] },
+          { type:'mc', q:"How do you say '2'?", a:'dos', ph:'dos', opts:['dos','uno','tres','cuatro'] },
+          { type:'mc', q:"How do you say '3'?", a:'tres', ph:'tres', opts:['tres','dos','cuatro','seis'] },
+          { type:'mc', q:"How do you say '4'?", a:'cuatro', ph:'KWA-tro', opts:['cuatro','tres','cinco','seis'] },
+          { type:'mc', q:"How do you say '5'?", a:'cinco', ph:'THEEN-ko', opts:['cinco','cuatro','seis','siete'] },
+          { type:'mc', q:"How do you say '6'?", a:'seis', ph:'says', opts:['seis','cinco','siete','ocho'] },
+          { type:'mc', q:"How do you say '7'?", a:'siete', ph:'SYET-ay', opts:['siete','seis','ocho','nueve'] },
+          { type:'mc', q:"How do you say '8'?", a:'ocho', ph:'O-cho', opts:['ocho','siete','nueve','diez'] },
+          { type:'mc', q:"How do you say '9'?", a:'nueve', ph:'NWAY-bay', opts:['nueve','ocho','diez','once'] },
+          { type:'mc', q:"How do you say '10'?", a:'diez', ph:'dyeth', opts:['diez','nueve','once','doce'] },
+          { type:'mc', q:"How do you say '11'?", a:'once', ph:'ON-thay', opts:['once','diez','doce','trece'] },
+          { type:'mc', q:"How do you say '12'?", a:'doce', ph:'DO-thay', opts:['doce','once','trece','catorce'] },
+          { type:'mc', q:"How do you say '13'?", a:'trece', ph:'TRAY-thay', opts:['trece','doce','catorce','quince'] },
+          { type:'mc', q:"How do you say '14'?", a:'catorce', ph:'ka-TOR-thay', opts:['catorce','trece','quince','dieciséis'] },
+          { type:'mc', q:"How do you say '15'?", a:'quince', ph:'KEEN-thay', opts:['quince','catorce','dieciséis','diecisiete'] },
+          { type:'mc', q:"How do you say '16'?", a:'dieciséis', ph:'dyeh-thee-SAYS', opts:['dieciséis','quince','diecisiete','dieciocho'] },
+          { type:'mc', q:"How do you say '17'?", a:'diecisiete', ph:'dyeh-thee-SYET-ay', opts:['diecisiete','dieciséis','dieciocho','diecinueve'] },
+          { type:'mc', q:"How do you say '18'?", a:'dieciocho', ph:'dyeh-thee-O-cho', opts:['dieciocho','diecisiete','diecinueve','veinte'] },
+          { type:'mc', q:"How do you say '19'?", a:'diecinueve', ph:'dyeh-thee-NWAY-bay', opts:['diecinueve','dieciocho','veinte','veintiuno'] },
+          { type:'mc', q:"How do you say '20'?", a:'veinte', ph:'BAYN-tay', opts:['veinte','diecinueve','veintiuno','treinta'] },
+          { type:'typed', q:"Write the number: 1", a:'uno', ph:'OO-no' },
+          { type:'typed', q:"Write the number: 5", a:'cinco', ph:'THEEN-ko' },
+          { type:'typed', q:"Write the number: 10", a:'diez', ph:'dyeth' },
+          { type:'typed', q:"Write the number: 15", a:'quince', ph:'KEEN-thay' },
+          { type:'typed', q:"Write the number: 20", a:'veinte', ph:'BAYN-tay' },
+        ]
+      },
+      {
+        name: 'Colores y ropa · Colours and Clothes',
+        desc: 'Jim\'s territory — colours and clothing',
+        timeLimit: 18,
+        qs: [
+          { type:'mc', q:"How do you say 'red'?", a:'rojo', ph:'RO-ho', opts:['rojo','azul','verde','amarillo'] },
+          { type:'mc', q:"How do you say 'blue'?", a:'azul', ph:'ah-THOOL', opts:['azul','rojo','verde','negro'] },
+          { type:'mc', q:"How do you say 'green'?", a:'verde', ph:'BAIR-day', opts:['verde','azul','amarillo','blanco'] },
+          { type:'mc', q:"How do you say 'yellow'?", a:'amarillo', ph:'ah-mah-REE-yo', opts:['amarillo','verde','naranja','rojo'] },
+          { type:'mc', q:"How do you say 'black'?", a:'negro', ph:'NAY-gro', opts:['negro','blanco','gris','azul'] },
+          { type:'mc', q:"How do you say 'white'?", a:'blanco', ph:'BLAN-ko', opts:['blanco','negro','gris','beige'] },
+          { type:'mc', q:"How do you say 'grey'?", a:'gris', ph:'grees', opts:['gris','negro','blanco','marrón'] },
+          { type:'mc', q:"How do you say 'brown'?", a:'marrón', ph:'mah-RON', opts:['marrón','gris','naranja','beige'] },
+          { type:'mc', q:"How do you say 'orange'?", a:'naranja', ph:'nah-RAN-ha', opts:['naranja','amarillo','rojo','marrón'] },
+          { type:'mc', q:"How do you say 'pink'?", a:'rosa', ph:'RO-sah', opts:['rosa','rojo','morado','naranja'] },
+          { type:'mc', q:"How do you say 'purple'?", a:'morado', ph:'mo-RAH-do', opts:['morado','rosa','azul','gris'] },
+          { type:'mc', q:"How do you say 'a t-shirt'?", a:'una camiseta', ph:'OO-nah kah-mee-SAY-tah', opts:['una camiseta','una camisa','un jersey','una chaqueta'] },
+          { type:'mc', q:"How do you say 'a shirt'?", a:'una camisa', ph:'OO-nah kah-MEE-sah', opts:['una camisa','una camiseta','un jersey','una chaqueta'] },
+          { type:'mc', q:"How do you say 'trousers / pants'?", a:'los pantalones', ph:'los pan-tah-LO-nes', opts:['los pantalones','los vaqueros','las zapatillas','los calcetines'] },
+          { type:'mc', q:"How do you say 'jeans'?", a:'los vaqueros', ph:'los bah-KAY-ros', opts:['los vaqueros','los pantalones','los shorts','las zapatillas'] },
+          { type:'mc', q:"How do you say 'trainers / sneakers'?", a:'las zapatillas', ph:'las thah-pah-TEE-yas', opts:['las zapatillas','los zapatos','las botas','los calcetines'] },
+          { type:'mc', q:"How do you say 'a jacket'?", a:'una chaqueta', ph:'OO-nah chah-KAY-tah', opts:['una chaqueta','un abrigo','una camisa','un jersey'] },
+          { type:'mc', q:"How do you say 'a hoodie / sweatshirt'?", a:'una sudadera', ph:'OO-nah soo-dah-DAY-rah', opts:['una sudadera','una camiseta','una chaqueta','un jersey'] },
+          { type:'mc', q:"How do you say 'I am wearing...'?", a:'Llevo...', ph:'YAY-bo', opts:['Llevo...','Tengo...','Visto...','Uso...'] },
+          { type:'mc', q:"How do you say 'What colour is it?'", a:'¿De qué color es?', ph:'day kay ko-LOR es', opts:['¿De qué color es?','¿Qué color tienes?','¿Cuál color?','¿Qué color?'] },
+          { type:'typed', q:"Write: red", a:'rojo', ph:'RO-ho' },
+          { type:'typed', q:"Write: blue", a:'azul', ph:'ah-THOOL' },
+          { type:'typed', q:"Write: black", a:'negro', ph:'NAY-gro' },
+          { type:'typed', q:"Write: white", a:'blanco', ph:'BLAN-ko' },
+          { type:'typed', q:"Write: jeans (Spanish)", a:'los vaqueros', ph:'los bah-KAY-ros' },
+          { type:'typed', q:"Write: I am wearing...", a:'Llevo...', ph:'YAY-bo' },
+        ]
+      },
+      {
+        name: 'La música · Music',
+        desc: 'Talk about music — Jim\'s world',
+        timeLimit: 18,
+        qs: [
+          { type:'mc', q:"How do you say 'music'?", a:'la música', ph:'lah MOO-see-kah', opts:['la música','la canción','el sonido','el ritmo'] },
+          { type:'mc', q:"How do you say 'a song'?", a:'una canción', ph:'OO-nah kan-THYON', opts:['una canción','una música','un ritmo','una melodía'] },
+          { type:'mc', q:"How do you say 'a singer'?", a:'un cantante', ph:'oon kan-TAN-tay', opts:['un cantante','un músico','un guitarrista','un artista'] },
+          { type:'mc', q:"How do you say 'a band / group'?", a:'un grupo', ph:'oon GROO-po', opts:['un grupo','una banda','un conjunto','un equipo'] },
+          { type:'mc', q:"How do you say 'a guitar'?", a:'una guitarra', ph:'OO-nah ghee-TAR-rah', opts:['una guitarra','un piano','una batería','un bajo'] },
+          { type:'mc', q:"How do you say 'I like music'?", a:'Me gusta la música', ph:'may GOOS-tah lah MOO-see-kah', opts:['Me gusta la música','Me encanta la música','Quiero la música','Amo la música'] },
+          { type:'mc', q:"How do you say 'I love music'?", a:'Me encanta la música', ph:'may en-KAN-tah lah MOO-see-kah', opts:['Me encanta la música','Me gusta la música','Adoro la música','Me fascina la música'] },
+          { type:'mc', q:"How do you say 'I don't like...'?", a:'No me gusta...', ph:'no may GOOS-tah', opts:['No me gusta...','No quiero...','No me encanta...','No gusta...'] },
+          { type:'mc', q:"How do you say 'What music do you like?'", a:'¿Qué música te gusta?', ph:'kay MOO-see-kah tay GOOS-tah', opts:['¿Qué música te gusta?','¿Te gusta la música?','¿Qué escuchas?','¿Cuál música?'] },
+          { type:'mc', q:"How do you say 'I listen to music'?", a:'Escucho música', ph:'es-KOO-cho MOO-see-kah', opts:['Escucho música','Oigo música','Miro música','Toco música'] },
+          { type:'mc', q:"How do you say 'a concert'?", a:'un concierto', ph:'oon kon-THYAIR-to', opts:['un concierto','un festival','un espectáculo','un show'] },
+          { type:'mc', q:"How do you say 'a playlist'?", a:'una lista de reproducción', ph:'OO-nah LEES-tah day ray-pro-dook-THYON', opts:['una lista de reproducción','una lista de música','un playlist','una colección'] },
+          { type:'mc', q:"How do you say 'headphones'?", a:'los auriculares', ph:'los ow-ree-koo-LAR-es', opts:['los auriculares','los cascos','los altavoces','los parlantes'] },
+          { type:'typed', q:"Write: I like music", a:'Me gusta la música', ph:'may GOOS-tah lah MOO-see-kah' },
+          { type:'typed', q:"Write: I love music", a:'Me encanta la música', ph:'may en-KAN-tah lah MOO-see-kah' },
+          { type:'typed', q:"Write: I listen to music", a:'Escucho música', ph:'es-KOO-cho MOO-see-kah' },
+          { type:'typed', q:"Write: a concert", a:'un concierto', ph:'oon kon-THYAIR-to' },
+          { type:'typed', q:"Write: a song", a:'una canción', ph:'OO-nah kan-THYON' },
+        ]
+      },
+      {
+        name: 'El cine · Film',
+        desc: 'Talk about films and cinema',
+        timeLimit: 18,
+        qs: [
+          { type:'mc', q:"How do you say 'a film / movie'?", a:'una película', ph:'OO-nah pay-LEE-koo-lah', opts:['una película','un cine','un film','una serie'] },
+          { type:'mc', q:"How do you say 'the cinema'?", a:'el cine', ph:'el THEE-nay', opts:['el cine','la película','el teatro','el estudio'] },
+          { type:'mc', q:"How do you say 'an actor'?", a:'un actor', ph:'oon ak-TOR', opts:['un actor','una actriz','un director','un personaje'] },
+          { type:'mc', q:"How do you say 'an actress'?", a:'una actriz', ph:'OO-nah ak-TREETH', opts:['una actriz','un actor','una directora','una protagonista'] },
+          { type:'mc', q:"How do you say 'a director'?", a:'un director', ph:'oon dee-rek-TOR', opts:['un director','un actor','un productor','un guionista'] },
+          { type:'mc', q:"How do you say 'I like films'?", a:'Me gustan las películas', ph:'may GOOS-tan las pay-LEE-koo-las', opts:['Me gustan las películas','Me gusta las películas','Me gustan películas','Me encanta películas'] },
+          { type:'mc', q:"How do you say 'an action film'?", a:'una película de acción', ph:'OO-nah pay-LEE-koo-lah day ak-THYON', opts:['una película de acción','una película de terror','una comedia','un documental'] },
+          { type:'mc', q:"How do you say 'a comedy'?", a:'una comedia', ph:'OO-nah ko-MAY-dyah', opts:['una comedia','un drama','una película de acción','una película de terror'] },
+          { type:'mc', q:"How do you say 'a horror film'?", a:'una película de terror', ph:'OO-nah pay-LEE-koo-lah day tair-OR', opts:['una película de terror','una comedia','un thriller','una película de acción'] },
+          { type:'mc', q:"How do you say 'subtitles'?", a:'los subtítulos', ph:'los soob-TEE-too-los', opts:['los subtítulos','los títulos','las traducciones','los textos'] },
+          { type:'mc', q:"How do you say 'What is your favourite film?'", a:'¿Cuál es tu película favorita?', ph:'kwal es too pay-LEE-koo-lah fah-bo-REE-tah', opts:['¿Cuál es tu película favorita?','¿Qué película te gusta?','¿Cuál película prefieres?','¿Cuál es tu favorita?'] },
+          { type:'mc', q:"How do you say 'It is very good'?", a:'Es muy buena', ph:'es mwee BWAY-nah', opts:['Es muy buena','Es muy bien','Está muy buena','Es muy bueno'] },
+          { type:'typed', q:"Write: a film", a:'una película', ph:'OO-nah pay-LEE-koo-lah' },
+          { type:'typed', q:"Write: the cinema", a:'el cine', ph:'el THEE-nay' },
+          { type:'typed', q:"Write: I like films", a:'Me gustan las películas', ph:'may GOOS-tan las pay-LEE-koo-las' },
+          { type:'typed', q:"Write: a comedy", a:'una comedia', ph:'OO-nah ko-MAY-dyah' },
+        ]
+      },
+      {
+        name: 'Cádiz · The City',
+        desc: 'Where you are going — know the place',
+        timeLimit: 18,
+        qs: [
+          { type:'mc', q:"How do you say 'the beach'?", a:'la playa', ph:'lah PLY-ah', opts:['la playa','el mar','la arena','la costa'] },
+          { type:'mc', q:"How do you say 'the sea'?", a:'el mar', ph:'el mar', opts:['el mar','la playa','el océano','el río'] },
+          { type:'mc', q:"How do you say 'the old town'?", a:'el casco antiguo', ph:'el KAS-ko an-TEE-gwo', opts:['el casco antiguo','el centro','la ciudad vieja','el barrio antiguo'] },
+          { type:'mc', q:"How do you say 'the language school'?", a:'la escuela de idiomas', ph:'lah es-KWAY-lah day ee-DYOH-mas', opts:['la escuela de idiomas','la academia','el colegio','la escuela de lenguas'] },
+          { type:'mc', q:"How do you say 'the market'?", a:'el mercado', ph:'el mair-KAH-do', opts:['el mercado','la tienda','el supermercado','la feria'] },
+          { type:'mc', q:"How do you say 'the cathedral'?", a:'la catedral', ph:'lah kah-tay-DRAL', opts:['la catedral','la iglesia','el templo','la basílica'] },
+          { type:'mc', q:"How do you say 'a street'?", a:'una calle', ph:'OO-nah KAY-yay', opts:['una calle','un camino','una avenida','un paseo'] },
+          { type:'mc', q:"How do you say 'the city centre'?", a:'el centro de la ciudad', ph:'el THEN-tro day lah thyoo-DAD', opts:['el centro de la ciudad','el centro','la ciudad','el medio'] },
+          { type:'mc', q:"How do you say 'Andalusia' (the region)?", a:'Andalucía', ph:'an-dah-loo-THEE-ah', opts:['Andalucía','Sevilla','España','el sur'] },
+          { type:'mc', q:"How do you say 'the south of Spain'?", a:'el sur de España', ph:'el soor day es-PAN-yah', opts:['el sur de España','el norte de España','el este de España','el centro de España'] },
+          { type:'mc', q:"How do you say 'hot' (weather)?", a:'hace calor', ph:'AH-thay kah-LOR', opts:['hace calor','hace frío','hace sol','hace viento'] },
+          { type:'mc', q:"How do you say 'the sun is shining'?", a:'hace sol', ph:'AH-thay sol', opts:['hace sol','hay sol','hace calor','el sol brilla'] },
+          { type:'mc', q:"How do you say 'Where is...?'", a:'¿Dónde está...?', ph:'DON-day es-TAH', opts:['¿Dónde está...?','¿Dónde es...?','¿Dónde hay...?','¿Dónde se encuentra...?'] },
+          { type:'mc', q:"How do you say 'How do I get to...?'", a:'¿Cómo llego a...?', ph:'KO-mo YAY-go ah', opts:['¿Cómo llego a...?','¿Cómo voy a...?','¿Dónde está...?','¿Cómo llegar a...?'] },
+          { type:'typed', q:"Write: the beach", a:'la playa', ph:'lah PLY-ah' },
+          { type:'typed', q:"Write: the sea", a:'el mar', ph:'el mar' },
+          { type:'typed', q:"Write: Where is...?", a:'¿Dónde está...?', ph:'DON-day es-TAH' },
+          { type:'typed', q:"Write: hot (weather — hace...)", a:'hace calor', ph:'AH-thay kah-LOR' },
+          { type:'typed', q:"Write: the language school", a:'la escuela de idiomas', ph:'lah es-KWAY-lah day ee-DYOH-mas' },
+        ]
+      },
+      {
+        name: 'Comida y bebida · Food and Drink',
+        desc: 'Order food, survive cafés',
+        timeLimit: 18,
+        qs: [
+          { type:'mc', q:"How do you say 'food'?", a:'la comida', ph:'lah ko-MEE-dah', opts:['la comida','la bebida','el menú','el plato'] },
+          { type:'mc', q:"How do you say 'water'?", a:'el agua', ph:'el AH-gwah', opts:['el agua','el zumo','el vino','la leche'] },
+          { type:'mc', q:"How do you say 'orange juice'?", a:'el zumo de naranja', ph:'el THOO-mo day nah-RAN-ha', opts:['el zumo de naranja','el zumo de manzana','la limonada','el refresco'] },
+          { type:'mc', q:"How do you say 'a coffee'?", a:'un café', ph:'oon kah-FAY', opts:['un café','un té','un cortado','un cola cao'] },
+          { type:'mc', q:"How do you say 'bread'?", a:'el pan', ph:'el pan', opts:['el pan','la tostada','el bocadillo','la barra'] },
+          { type:'mc', q:"How do you say 'a sandwich (baguette style)'?", a:'un bocadillo', ph:'oon bo-kah-DEE-yo', opts:['un bocadillo','un sándwich','un bocata','una tostada'] },
+          { type:'mc', q:"How do you say 'I would like...'?", a:'Quisiera...', ph:'kee-SYAIR-ah', opts:['Quisiera...','Quiero...','Me gustaría...','Deseo...'] },
+          { type:'mc', q:"How do you say 'I want...' (informal)?", a:'Quiero...', ph:'KYAIR-o', opts:['Quiero...','Quisiera...','Me da...','Necesito...'] },
+          { type:'mc', q:"How do you say 'The bill please'?", a:'La cuenta, por favor', ph:'lah KWEN-tah por fah-VOR', opts:['La cuenta, por favor','El precio, por favor','Pago, por favor','La factura, por favor'] },
+          { type:'mc', q:"How do you say 'How much does it cost?'", a:'¿Cuánto cuesta?', ph:'KWAN-to KWES-tah', opts:['¿Cuánto cuesta?','¿Cuánto es?','¿Qué precio tiene?','¿Cuánto vale?'] },
+          { type:'mc', q:"How do you say 'delicious'?", a:'delicioso', ph:'day-lee-THYOH-so', opts:['delicioso','rico','bueno','sabroso'] },
+          { type:'mc', q:"How do you say 'I am hungry'?", a:'Tengo hambre', ph:'TEN-go AM-bray', opts:['Tengo hambre','Estoy hambriento','Tengo hambre yo','Me apetece comer'] },
+          { type:'mc', q:"How do you say 'I am thirsty'?", a:'Tengo sed', ph:'TEN-go sed', opts:['Tengo sed','Estoy sediento','Quiero beber','Necesito agua'] },
+          { type:'typed', q:"Write: I would like...", a:'Quisiera...', ph:'kee-SYAIR-ah' },
+          { type:'typed', q:"Write: The bill please", a:'La cuenta, por favor', ph:'lah KWEN-tah por fah-VOR' },
+          { type:'typed', q:"Write: How much does it cost?", a:'¿Cuánto cuesta?', ph:'KWAN-to KWES-tah' },
+          { type:'typed', q:"Write: I am hungry", a:'Tengo hambre', ph:'TEN-go AM-bray' },
+          { type:'typed', q:"Write: water", a:'el agua', ph:'el AH-gwah' },
+        ]
+      },
+    ]
+  },
+  {
+    id: 'A2',
+    name: 'Elemental',
+    badge: '🌿',
+    desc: 'Building real sentences — getting there',
+    bossTarget: 240,
+    bossPraise: '¡Fenomenal! A2 done. Your host family in Cádiz won\'t know what hit them. Pure class.',
+    badgeIrish: 'Ya puedes mantener una conversación',
+    badgeIrishEn: 'You can already hold a conversation',
+    loops: [
+      {
+        name: 'La familia · Family',
+        desc: 'Talk about the people in your life',
+        timeLimit: 18,
+        qs: [
+          { type:'mc', q:"How do you say 'my father'?", a:'mi padre', ph:'mee PAH-dray', opts:['mi padre','mi madre','mi hermano','mi abuelo'] },
+          { type:'mc', q:"How do you say 'my mother'?", a:'mi madre', ph:'mee MAH-dray', opts:['mi madre','mi padre','mi hermana','mi abuela'] },
+          { type:'mc', q:"How do you say 'my brother'?", a:'mi hermano', ph:'mee air-MAH-no', opts:['mi hermano','mi hermana','mi primo','mi tío'] },
+          { type:'mc', q:"How do you say 'my sister'?", a:'mi hermana', ph:'mee air-MAH-nah', opts:['mi hermana','mi hermano','mi prima','mi tía'] },
+          { type:'mc', q:"How do you say 'my grandfather'?", a:'mi abuelo', ph:'mee ah-BWAY-lo', opts:['mi abuelo','mi abuela','mi padre','mi tío'] },
+          { type:'mc', q:"How do you say 'my grandmother'?", a:'mi abuela', ph:'mee ah-BWAY-lah', opts:['mi abuela','mi abuelo','mi madre','mi tía'] },
+          { type:'mc', q:"How do you say 'my friend' (male)?", a:'mi amigo', ph:'mee ah-MEE-go', opts:['mi amigo','mi amiga','mi compañero','mi colega'] },
+          { type:'mc', q:"How do you say 'my friend' (female)?", a:'mi amiga', ph:'mee ah-MEE-gah', opts:['mi amiga','mi amigo','mi compañera','mi colega'] },
+          { type:'mc', q:"How do you say 'I have two brothers'?", a:'Tengo dos hermanos', ph:'TEN-go dos air-MAH-nos', opts:['Tengo dos hermanos','Soy dos hermanos','Tengo dos hermanas','Hay dos hermanos'] },
+          { type:'mc', q:"How do you say 'I am an only child'?", a:'Soy hijo único', ph:'soy EE-ho OO-nee-ko', opts:['Soy hijo único','Soy solo','No tengo hermanos','Soy único'] },
+          { type:'mc', q:"How do you say 'I live with my family'?", a:'Vivo con mi familia', ph:'BEE-bo kon mee fah-MEE-lyah', opts:['Vivo con mi familia','Estoy con mi familia','Vivo mi familia','Habito con mi familia'] },
+          { type:'mc', q:"How do you say 'We get along well'?", a:'Nos llevamos bien', ph:'nos yay-BAH-mos bee-EN', opts:['Nos llevamos bien','Llevamos bien','Nos llevemos bien','Nos vamos bien'] },
+          { type:'typed', q:"Write: my father", a:'mi padre', ph:'mee PAH-dray' },
+          { type:'typed', q:"Write: my mother", a:'mi madre', ph:'mee MAH-dray' },
+          { type:'typed', q:"Write: my brother", a:'mi hermano', ph:'mee air-MAH-no' },
+          { type:'typed', q:"Write: my sister", a:'mi hermana', ph:'mee air-MAH-nah' },
+          { type:'typed', q:"Write: I have two brothers", a:'Tengo dos hermanos', ph:'TEN-go dos air-MAH-nos' },
+          { type:'typed', q:"Write: I live with my family", a:'Vivo con mi familia', ph:'BEE-bo kon mee fah-MEE-lyah' },
+        ]
+      },
+      {
+        name: 'El presente · Present Tense',
+        desc: 'What you do every day — -ar verbs',
+        timeLimit: 18,
+        qs: [
+          { type:'mc', q:"How do you say 'I speak'?", a:'hablo', ph:'AH-blo', opts:['hablo','hablas','habla','hablamos'] },
+          { type:'mc', q:"How do you say 'you speak' (informal)?", a:'hablas', ph:'AH-blas', opts:['hablas','hablo','habla','habláis'] },
+          { type:'mc', q:"How do you say 'he/she speaks'?", a:'habla', ph:'AH-blah', opts:['habla','hablo','hablas','hablan'] },
+          { type:'mc', q:"How do you say 'I listen'?", a:'escucho', ph:'es-KOO-cho', opts:['escucho','escuchas','escucha','escuchamos'] },
+          { type:'mc', q:"How do you say 'I study'?", a:'estudio', ph:'es-TOO-dyoh', opts:['estudio','estudias','estudia','estudiamos'] },
+          { type:'mc', q:"How do you say 'I work'?", a:'trabajo', ph:'trah-BAH-ho', opts:['trabajo','trabajas','trabaja','trabajamos'] },
+          { type:'mc', q:"How do you say 'I live'?", a:'vivo', ph:'BEE-bo', opts:['vivo','vives','vive','vivimos'] },
+          { type:'mc', q:"How do you say 'I eat'?", a:'como', ph:'KO-mo', opts:['como','comes','come','comemos'] },
+          { type:'mc', q:"How do you say 'I go'?", a:'voy', ph:'boy', opts:['voy','vas','va','vamos'] },
+          { type:'mc', q:"How do you say 'I have' (possession)?", a:'tengo', ph:'TEN-go', opts:['tengo','tienes','tiene','tenemos'] },
+          { type:'mc', q:"How do you say 'I want'?", a:'quiero', ph:'KYAIR-o', opts:['quiero','quieres','quiere','queremos'] },
+          { type:'mc', q:"How do you say 'I can'?", a:'puedo', ph:'PWAY-do', opts:['puedo','puedes','puede','podemos'] },
+          { type:'mc', q:"How do you say 'I know' (a fact)?", a:'sé', ph:'say', opts:['sé','sabes','sabe','sabemos'] },
+          { type:'mc', q:"How do you say 'I like' (singular thing)?", a:'me gusta', ph:'may GOOS-tah', opts:['me gusta','me gustan','te gusta','le gusta'] },
+          { type:'mc', q:"How do you say 'I like' (plural things)?", a:'me gustan', ph:'may GOOS-tan', opts:['me gustan','me gusta','te gustan','les gustan'] },
+          { type:'typed', q:"Write: I speak", a:'hablo', ph:'AH-blo' },
+          { type:'typed', q:"Write: I study", a:'estudio', ph:'es-TOO-dyoh' },
+          { type:'typed', q:"Write: I live", a:'vivo', ph:'BEE-bo' },
+          { type:'typed', q:"Write: I want", a:'quiero', ph:'KYAIR-o' },
+          { type:'typed', q:"Write: I can", a:'puedo', ph:'PWAY-do' },
+          { type:'typed', q:"Write: I like (singular)", a:'me gusta', ph:'may GOOS-tah' },
+        ]
+      },
+      {
+        name: 'El tiempo libre · Free Time',
+        desc: 'Hobbies, sports, what you do',
+        timeLimit: 18,
+        qs: [
+          { type:'mc', q:"How do you say 'free time'?", a:'el tiempo libre', ph:'el TYEM-po LEE-bray', opts:['el tiempo libre','el ocio','el descanso','el recreo'] },
+          { type:'mc', q:"How do you say 'sport'?", a:'el deporte', ph:'el day-POR-tay', opts:['el deporte','el juego','el ejercicio','el fútbol'] },
+          { type:'mc', q:"How do you say 'football'?", a:'el fútbol', ph:'el FOOT-bol', opts:['el fútbol','el baloncesto','el tenis','el rugby'] },
+          { type:'mc', q:"How do you say 'I play football'?", a:'Juego al fútbol', ph:'HWAY-go al FOOT-bol', opts:['Juego al fútbol','Juego fútbol','Hago fútbol','Practico el fútbol'] },
+          { type:'mc', q:"How do you say 'I go to the cinema'?", a:'Voy al cine', ph:'boy al THEE-nay', opts:['Voy al cine','Voy el cine','Voy a cine','Me voy al cine'] },
+          { type:'mc', q:"How do you say 'I listen to music'?", a:'Escucho música', ph:'es-KOO-cho MOO-see-kah', opts:['Escucho música','Oigo música','Escucho la música','Miro música'] },
+          { type:'mc', q:"How do you say 'I spend time with friends'?", a:'Paso tiempo con mis amigos', ph:'PAH-so TYEM-po kon mees ah-MEE-gos', opts:['Paso tiempo con mis amigos','Estoy con mis amigos','Voy con mis amigos','Me junto con mis amigos'] },
+          { type:'mc', q:"How do you say 'in my free time'?", a:'en mi tiempo libre', ph:'en mee TYEM-po LEE-bray', opts:['en mi tiempo libre','en mi ocio','en mis ratos libres','cuando estoy libre'] },
+          { type:'mc', q:"How do you say 'I read'?", a:'leo', ph:'LAY-oh', opts:['leo','lees','lee','leemos'] },
+          { type:'mc', q:"How do you say 'I draw'?", a:'dibujo', ph:'dee-BOO-ho', opts:['dibujo','dibujas','dibuja','dibujamos'] },
+          { type:'mc', q:"How do you say 'I use social media'?", a:'Uso las redes sociales', ph:'OO-so las RAY-des so-THYAH-les', opts:['Uso las redes sociales','Uso social media','Hago las redes sociales','Tengo redes sociales'] },
+          { type:'mc', q:"How do you say 'I watch series / shows'?", a:'Veo series', ph:'BAY-oh SAY-ryays', opts:['Veo series','Miro series','Veo películas','Veo programas'] },
+          { type:'typed', q:"Write: in my free time", a:'en mi tiempo libre', ph:'en mee TYEM-po LEE-bray' },
+          { type:'typed', q:"Write: I play football", a:'Juego al fútbol', ph:'HWAY-go al FOOT-bol' },
+          { type:'typed', q:"Write: I go to the cinema", a:'Voy al cine', ph:'boy al THEE-nay' },
+          { type:'typed', q:"Write: I watch series", a:'Veo series', ph:'BAY-oh SAY-ryays' },
+          { type:'typed', q:"Write: I spend time with friends", a:'Paso tiempo con mis amigos', ph:'PAH-so TYEM-po kon mees ah-MEE-gos' },
+        ]
+      },
+      {
+        name: 'La escuela · School',
+        desc: 'Classroom language — useful in Cádiz',
+        timeLimit: 18,
+        qs: [
+          { type:'mc', q:"How do you say 'the classroom'?", a:'la clase', ph:'lah KLA-say', opts:['la clase','el aula','el salón','la sala'] },
+          { type:'mc', q:"How do you say 'the teacher' (male)?", a:'el profesor', ph:'el pro-fay-SOR', opts:['el profesor','la profesora','el maestro','el tutor'] },
+          { type:'mc', q:"How do you say 'the teacher' (female)?", a:'la profesora', ph:'lah pro-fay-SOR-ah', opts:['la profesora','el profesor','la maestra','la tutora'] },
+          { type:'mc', q:"How do you say 'homework'?", a:'los deberes', ph:'los day-BAIR-es', opts:['los deberes','la tarea','el trabajo','los ejercicios'] },
+          { type:'mc', q:"How do you say 'an exam'?", a:'un examen', ph:'oon ek-SAH-men', opts:['un examen','una prueba','un test','una evaluación'] },
+          { type:'mc', q:"How do you say 'I don't understand'?", a:'No entiendo', ph:'no en-TYEN-do', opts:['No entiendo','No sé','No comprendo','No me entero'] },
+          { type:'mc', q:"How do you say 'Can you explain that again?'", a:'¿Puedes explicarlo otra vez?', ph:'PWAY-des eks-plee-KAR-lo OH-trah beth', opts:['¿Puedes explicarlo otra vez?','¿Puedes repetir?','¿Otra vez por favor?','¿Me lo explicas?'] },
+          { type:'mc', q:"How do you say 'How do you say... in Spanish?'", a:'¿Cómo se dice... en español?', ph:'KO-mo say DEE-thay en es-pan-YOL', opts:['¿Cómo se dice... en español?','¿Cómo dices en español?','¿Qué se dice en español?','¿Cómo es en español?'] },
+          { type:'mc', q:"How do you say 'I have a question'?", a:'Tengo una pregunta', ph:'TEN-go OO-nah pray-GOON-tah', opts:['Tengo una pregunta','Quiero preguntar','Hay una pregunta','Tengo una duda'] },
+          { type:'mc', q:"How do you say 'I am lost' (confused)?", a:'Estoy perdido', ph:'es-TOY pair-DEE-do', opts:['Estoy perdido','Me he perdido','Estoy confundido','No sé dónde estoy'] },
+          { type:'mc', q:"How do you say 'Is this correct?'", a:'¿Está bien esto?', ph:'es-TAH bee-EN ES-to', opts:['¿Está bien esto?','¿Es correcto?','¿Está correcto?','¿Esto es bien?'] },
+          { type:'mc', q:"How do you say 'I need help'?", a:'Necesito ayuda', ph:'nay-thay-SEE-to ah-YOO-dah', opts:['Necesito ayuda','Quiero ayuda','Me ayudas','Ayúdame'] },
+          { type:'typed', q:"Write: I don't understand", a:'No entiendo', ph:'no en-TYEN-do' },
+          { type:'typed', q:"Write: How do you say... in Spanish?", a:'¿Cómo se dice... en español?', ph:'KO-mo say DEE-thay en es-pan-YOL' },
+          { type:'typed', q:"Write: I have a question", a:'Tengo una pregunta', ph:'TEN-go OO-nah pray-GOON-tah' },
+          { type:'typed', q:"Write: I need help", a:'Necesito ayuda', ph:'nay-thay-SEE-to ah-YOO-dah' },
+          { type:'typed', q:"Write: Can you explain that again?", a:'¿Puedes explicarlo otra vez?', ph:'PWAY-des eks-plee-KAR-lo OH-trah beth' },
+        ]
+      },
+      {
+        name: 'Descripción · Description',
+        desc: 'Describe yourself and others',
+        timeLimit: 18,
+        qs: [
+          { type:'mc', q:"How do you say 'tall'?", a:'alto', ph:'AL-to', opts:['alto','bajo','grande','gordo'] },
+          { type:'mc', q:"How do you say 'short'?", a:'bajo', ph:'BAH-ho', opts:['bajo','alto','pequeño','delgado'] },
+          { type:'mc', q:"How do you say 'thin / slim'?", a:'delgado', ph:'del-GAH-do', opts:['delgado','gordo','fuerte','alto'] },
+          { type:'mc', q:"How do you say 'funny'?", a:'gracioso', ph:'gra-THYOH-so', opts:['gracioso','divertido','simpático','alegre'] },
+          { type:'mc', q:"How do you say 'friendly / nice'?", a:'simpático', ph:'seem-PAH-tee-ko', opts:['simpático','amable','agradable','bueno'] },
+          { type:'mc', q:"How do you say 'intelligent'?", a:'inteligente', ph:'een-tay-lee-HEN-tay', opts:['inteligente','listo','listo','brillante'] },
+          { type:'mc', q:"How do you say 'shy'?", a:'tímido', ph:'TEE-mee-do', opts:['tímido','vergonzoso','callado','introvertido'] },
+          { type:'mc', q:"How do you say 'creative'?", a:'creativo', ph:'kray-ah-TEE-bo', opts:['creativo','artístico','imaginativo','original'] },
+          { type:'mc', q:"How do you say 'I am...' (personality — permanent)?", a:'Soy...', ph:'soy', opts:['Soy...','Estoy...','Tengo...','Me llamo...'] },
+          { type:'mc', q:"How do you say 'I am...' (feeling — temporary)?", a:'Estoy...', ph:'es-TOY', opts:['Estoy...','Soy...','Tengo...','Me encuentro...'] },
+          { type:'mc', q:"How do you say 'I am happy' (feeling right now)?", a:'Estoy contento', ph:'es-TOY kon-TEN-to', opts:['Estoy contento','Soy contento','Soy feliz','Estoy alegre'] },
+          { type:'mc', q:"How do you say 'I am interesting' (personality)?", a:'Soy interesante', ph:'soy een-tay-ray-SAN-tay', opts:['Soy interesante','Estoy interesante','Soy curioso','Soy único'] },
+          { type:'typed', q:"Write: tall", a:'alto', ph:'AL-to' },
+          { type:'typed', q:"Write: funny", a:'gracioso', ph:'gra-THYOH-so' },
+          { type:'typed', q:"Write: friendly / nice", a:'simpático', ph:'seem-PAH-tee-ko' },
+          { type:'typed', q:"Write: I am... (permanent)", a:'Soy...', ph:'soy' },
+          { type:'typed', q:"Write: I am... (temporary/feeling)", a:'Estoy...', ph:'es-TOY' },
+          { type:'typed', q:"Write: creative", a:'creativo', ph:'kray-ah-TEE-bo' },
+        ]
+      },
+      {
+        name: 'La ciudad · Getting Around',
+        desc: 'Navigate Cádiz like you know it',
+        timeLimit: 18,
+        qs: [
+          { type:'mc', q:"How do you say 'on the left'?", a:'a la izquierda', ph:'ah lah eeth-KYAIR-dah', opts:['a la izquierda','a la derecha','todo recto','enfrente'] },
+          { type:'mc', q:"How do you say 'on the right'?", a:'a la derecha', ph:'ah lah day-RAY-chah', opts:['a la derecha','a la izquierda','todo recto','al lado'] },
+          { type:'mc', q:"How do you say 'straight ahead'?", a:'todo recto', ph:'TOH-do REK-to', opts:['todo recto','a la derecha','a la izquierda','enfrente'] },
+          { type:'mc', q:"How do you say 'opposite'?", a:'enfrente', ph:'en-FREN-tay', opts:['enfrente','al lado','detrás','delante'] },
+          { type:'mc', q:"How do you say 'near'?", a:'cerca', ph:'THAIR-kah', opts:['cerca','lejos','al lado','próximo'] },
+          { type:'mc', q:"How do you say 'far'?", a:'lejos', ph:'LAY-hos', opts:['lejos','cerca','distante','largo'] },
+          { type:'mc', q:"How do you say 'the bus stop'?", a:'la parada de autobús', ph:'lah pah-RAH-dah day ow-to-BOOS', opts:['la parada de autobús','la estación de autobús','el autobús','la parada'] },
+          { type:'mc', q:"How do you say 'the train station'?", a:'la estación de tren', ph:'lah es-tah-THYON day tren', opts:['la estación de tren','la estación de metro','el tren','la estación'] },
+          { type:'mc', q:"How do you say 'How far is it?'", a:'¿A cuánto está?', ph:'ah KWAN-to es-TAH', opts:['¿A cuánto está?','¿Cómo de lejos está?','¿Qué distancia hay?','¿Está lejos?'] },
+          { type:'mc', q:"How do you say 'Is it far?'", a:'¿Está lejos?', ph:'es-TAH LAY-hos', opts:['¿Está lejos?','¿Es lejos?','¿Hay mucho?','¿Está cerca?'] },
+          { type:'mc', q:"How do you say 'Take the first street on the left'?", a:'Toma la primera calle a la izquierda', ph:'TOH-mah lah pree-MAIR-ah KAY-yay ah lah eeth-KYAIR-dah', opts:['Toma la primera calle a la izquierda','Coge la primera calle izquierda','Ve a la izquierda','Gira a la izquierda'] },
+          { type:'mc', q:"How do you say 'I am lost'?", a:'Estoy perdido', ph:'es-TOY pair-DEE-do', opts:['Estoy perdido','Me he perdido','No sé dónde estoy','Estoy desorientado'] },
+          { type:'typed', q:"Write: on the left", a:'a la izquierda', ph:'ah lah eeth-KYAIR-dah' },
+          { type:'typed', q:"Write: on the right", a:'a la derecha', ph:'ah lah day-RAY-chah' },
+          { type:'typed', q:"Write: straight ahead", a:'todo recto', ph:'TOH-do REK-to' },
+          { type:'typed', q:"Write: near", a:'cerca', ph:'THAIR-kah' },
+          { type:'typed', q:"Write: I am lost", a:'Estoy perdido', ph:'es-TOY pair-DEE-do' },
+        ]
+      },
+      {
+        name: 'El pasado · Past Tense intro',
+        desc: 'Talk about what happened',
+        timeLimit: 20,
+        qs: [
+          { type:'mc', q:"How do you say 'I went'?", a:'fui', ph:'fwee', opts:['fui','fue','iba','fui a'] },
+          { type:'mc', q:"How do you say 'I ate'?", a:'comí', ph:'ko-MEE', opts:['comí','comió','comía','comer'] },
+          { type:'mc', q:"How do you say 'I watched'?", a:'vi', ph:'bee', opts:['vi','vio','veía','miré'] },
+          { type:'mc', q:"How do you say 'I listened'?", a:'escuché', ph:'es-koo-CHAY', opts:['escuché','escuchó','escuchaba','escuchar'] },
+          { type:'mc', q:"How do you say 'I spoke'?", a:'hablé', ph:'ah-BLAY', opts:['hablé','habló','hablaba','hablar'] },
+          { type:'mc', q:"How do you say 'I played'?", a:'jugué', ph:'hoo-GAY', opts:['jugué','jugó','jugaba','jugar'] },
+          { type:'mc', q:"How do you say 'I bought'?", a:'compré', ph:'kom-PRAY', opts:['compré','compró','compraba','comprar'] },
+          { type:'mc', q:"How do you say 'yesterday'?", a:'ayer', ph:'ah-YAIR', opts:['ayer','hoy','mañana','anteayer'] },
+          { type:'mc', q:"How do you say 'last night'?", a:'anoche', ph:'ah-NO-chay', opts:['anoche','esta noche','ayer por la noche','la noche pasada'] },
+          { type:'mc', q:"How do you say 'last week'?", a:'la semana pasada', ph:'lah say-MAH-nah pah-SAH-dah', opts:['la semana pasada','esta semana','la semana anterior','la semana que viene'] },
+          { type:'mc', q:"How do you say 'It was good'?", a:'Fue bien', ph:'fway bee-EN', opts:['Fue bien','Fue bueno','Estuvo bien','Era bien'] },
+          { type:'mc', q:"How do you say 'It was great'?", a:'Fue genial', ph:'fway hen-YAHL', opts:['Fue genial','Fue fantástico','Estuvo genial','Fue increíble'] },
+          { type:'typed', q:"Write: yesterday", a:'ayer', ph:'ah-YAIR' },
+          { type:'typed', q:"Write: last night", a:'anoche', ph:'ah-NO-chay' },
+          { type:'typed', q:"Write: It was great", a:'Fue genial', ph:'fway hen-YAHL' },
+          { type:'typed', q:"Write: I went", a:'fui', ph:'fwee' },
+          { type:'typed', q:"Write: I spoke", a:'hablé', ph:'ah-BLAY' },
+          { type:'typed', q:"Write: last week", a:'la semana pasada', ph:'lah say-MAH-nah pah-SAH-dah' },
+        ]
+      },
+    ]
+  },
+  {
+    id: 'B1',
+    name: 'Intermedio',
+    badge: '🌳',
+    desc: 'Real conversations — you can surprise people now',
+    bossTarget: 180,
+    bossPraise: '¡Extraordinario! B1 — you are genuinely good at this. That language school won\'t know what hit them.',
+    badgeIrish: 'Ya no eres un principiante',
+    badgeIrishEn: 'You are no longer a beginner',
+    loops: [
+      {
+        name: 'Opiniones · Opinions',
+        desc: 'Say what you think',
+        timeLimit: 20,
+        qs: [
+          { type:'mc', q:"How do you say 'I think that...'?", a:'Creo que...', ph:'KRAY-oh kay', opts:['Creo que...','Pienso que...','Opino que...','Me parece que...'] },
+          { type:'mc', q:"How do you say 'In my opinion...'?", a:'En mi opinión...', ph:'en mee oh-peen-YON', opts:['En mi opinión...','A mi parecer...','Desde mi punto de vista...','Para mí...'] },
+          { type:'mc', q:"How do you say 'I agree'?", a:'Estoy de acuerdo', ph:'es-TOY day ah-KWAIR-do', opts:['Estoy de acuerdo','Estoy acordado','Sí, verdad','Tengo razón'] },
+          { type:'mc', q:"How do you say 'I disagree'?", a:'No estoy de acuerdo', ph:'no es-TOY day ah-KWAIR-do', opts:['No estoy de acuerdo','No acuerdo','Estoy en desacuerdo','No tengo razón'] },
+          { type:'mc', q:"How do you say 'It seems to me that...'?", a:'Me parece que...', ph:'may pah-RAY-thay kay', opts:['Me parece que...','Me piensa que...','Parece que...','Creo que...'] },
+          { type:'mc', q:"How do you say 'On one hand... on the other...'?", a:'Por un lado... por otro...', ph:'por oon LAH-do por OH-tro', opts:['Por un lado... por otro...','Por una parte... por otra...','Primero... luego...','Aunque... sin embargo...'] },
+          { type:'mc', q:"How do you say 'However...'?", a:'Sin embargo...', ph:'seen em-BAR-go', opts:['Sin embargo...','Pero...','Aunque...','No obstante...'] },
+          { type:'mc', q:"How do you say 'Although...'?", a:'Aunque...', ph:'OWN-kay', opts:['Aunque...','Sin embargo...','Pero...','A pesar de...'] },
+          { type:'mc', q:"How do you say 'In conclusion...'?", a:'En conclusión...', ph:'en kon-kloo-SYON', opts:['En conclusión...','Para concluir...','En resumen...','Finalmente...'] },
+          { type:'mc', q:"How do you say 'It is important that...'?", a:'Es importante que...', ph:'es eem-por-TAN-tay kay', opts:['Es importante que...','Es necesario que...','Es fundamental que...','Es vital que...'] },
+          { type:'typed', q:"Write: I think that...", a:'Creo que...', ph:'KRAY-oh kay' },
+          { type:'typed', q:"Write: In my opinion...", a:'En mi opinión...', ph:'en mee oh-peen-YON' },
+          { type:'typed', q:"Write: I agree", a:'Estoy de acuerdo', ph:'es-TOY day ah-KWAIR-do' },
+          { type:'typed', q:"Write: However...", a:'Sin embargo...', ph:'seen em-BAR-go' },
+          { type:'typed', q:"Write: Although...", a:'Aunque...', ph:'OWN-kay' },
+          { type:'typed', q:"Write: It seems to me that...", a:'Me parece que...', ph:'may pah-RAY-thay kay' },
+        ]
+      },
+      {
+        name: 'El futuro · Future Tense',
+        desc: 'Talk about what will happen in Cádiz',
+        timeLimit: 20,
+        qs: [
+          { type:'mc', q:"How do you say 'I will go'?", a:'iré', ph:'ee-RAY', opts:['iré','voy a ir','voy','fui'] },
+          { type:'mc', q:"How do you say 'I am going to go' (near future)?", a:'voy a ir', ph:'boy ah eer', opts:['voy a ir','iré','voy','vaya'] },
+          { type:'mc', q:"How do you say 'I will speak'?", a:'hablaré', ph:'ah-blah-RAY', opts:['hablaré','voy a hablar','hablé','hablaría'] },
+          { type:'mc', q:"How do you say 'I will study'?", a:'estudiaré', ph:'es-too-dyah-RAY', opts:['estudiaré','voy a estudiar','estudié','estudiaría'] },
+          { type:'mc', q:"How do you say 'I will be able to'?", a:'podré', ph:'po-DRAY', opts:['podré','voy a poder','pude','podría'] },
+          { type:'mc', q:"How do you say 'Next week'?", a:'la semana que viene', ph:'lah say-MAH-nah kay BYAY-nay', opts:['la semana que viene','la próxima semana','la semana siguiente','la semana pasada'] },
+          { type:'mc', q:"How do you say 'Next summer'?", a:'el próximo verano', ph:'el PROK-see-mo bay-RAH-no', opts:['el próximo verano','el verano que viene','el siguiente verano','el verano próximo'] },
+          { type:'mc', q:"How do you say 'I am going to Cádiz'?", a:'Voy a Cádiz', ph:'boy ah KAH-deeth', opts:['Voy a Cádiz','Voy Cádiz','Me voy a Cádiz','Voy en Cádiz'] },
+          { type:'mc', q:"How do you say 'I will improve my Spanish'?", a:'Voy a mejorar mi español', ph:'boy ah may-ho-RAR mee es-pan-YOL', opts:['Voy a mejorar mi español','Mejoraré mi español','Voy a mejorar español','Quiero mejorar español'] },
+          { type:'mc', q:"How do you say 'It will be fun'?", a:'Será divertido', ph:'say-RAH dee-bair-TEE-do', opts:['Será divertido','Será divertida','Estará divertido','Va a ser divertido'] },
+          { type:'typed', q:"Write: I am going to go (near future)", a:'voy a ir', ph:'boy ah eer' },
+          { type:'typed', q:"Write: I will speak", a:'hablaré', ph:'ah-blah-RAY' },
+          { type:'typed', q:"Write: I am going to Cádiz", a:'Voy a Cádiz', ph:'boy ah KAH-deeth' },
+          { type:'typed', q:"Write: Next week", a:'la semana que viene', ph:'lah say-MAH-nah kay BYAY-nay' },
+          { type:'typed', q:"Write: It will be fun", a:'Será divertido', ph:'say-RAH dee-bair-TEE-do' },
+          { type:'typed', q:"Write: I will improve my Spanish", a:'Voy a mejorar mi español', ph:'boy ah may-ho-RAR mee es-pan-YOL' },
+        ]
+      },
+      {
+        name: 'El condicional · Conditional',
+        desc: 'Would, could, should',
+        timeLimit: 20,
+        qs: [
+          { type:'mc', q:"How do you say 'I would like...'?", a:'Me gustaría...', ph:'may goos-tah-REE-ah', opts:['Me gustaría...','Quisiera...','Me gustaré...','Quiero...'] },
+          { type:'mc', q:"How do you say 'I would go'?", a:'iría', ph:'ee-REE-ah', opts:['iría','fui','voy a ir','iré'] },
+          { type:'mc', q:"How do you say 'I would speak'?", a:'hablaría', ph:'ah-blah-REE-ah', opts:['hablaría','hablé','hablaré','hablo'] },
+          { type:'mc', q:"How do you say 'I would like to visit Cádiz'?", a:'Me gustaría visitar Cádiz', ph:'may goos-tah-REE-ah bee-see-TAR KAH-deeth', opts:['Me gustaría visitar Cádiz','Quisiera visitar Cádiz','Quiero visitar Cádiz','Visitaré Cádiz'] },
+          { type:'mc', q:"How do you say 'I could'?", a:'podría', ph:'po-DREE-ah', opts:['podría','puedo','pude','podré'] },
+          { type:'mc', q:"How do you say 'I should'?", a:'debería', ph:'day-bay-REE-ah', opts:['debería','debo','debo de','debía'] },
+          { type:'mc', q:"How do you say 'If I could, I would...'?", a:'Si pudiera, ...ría', ph:'see poo-DYAIR-ah ...REE-ah', opts:['Si pudiera, ...ría','Si puedo, ...ré','Si podría, ...ría','Si pudiera, ...ré'] },
+          { type:'mc', q:"How do you say 'It would be better to...'?", a:'Sería mejor...', ph:'say-REE-ah may-HOR', opts:['Sería mejor...','Es mejor...','Será mejor...','Fue mejor...'] },
+          { type:'typed', q:"Write: I would like...", a:'Me gustaría...', ph:'may goos-tah-REE-ah' },
+          { type:'typed', q:"Write: I would go", a:'iría', ph:'ee-REE-ah' },
+          { type:'typed', q:"Write: I could", a:'podría', ph:'po-DREE-ah' },
+          { type:'typed', q:"Write: I should", a:'debería', ph:'day-bay-REE-ah' },
+          { type:'typed', q:"Write: It would be better to...", a:'Sería mejor...', ph:'say-REE-ah may-HOR' },
+          { type:'typed', q:"Write: I would like to visit Cádiz", a:'Me gustaría visitar Cádiz', ph:'may goos-tah-REE-ah bee-see-TAR KAH-deeth' },
+        ]
+      },
+      {
+        name: 'La tecnología · Tech and Media',
+        desc: 'Social media, streaming, the digital world',
+        timeLimit: 20,
+        qs: [
+          { type:'mc', q:"How do you say 'a mobile phone'?", a:'un móvil', ph:'oon MOH-beel', opts:['un móvil','un teléfono','un smartphone','un celular'] },
+          { type:'mc', q:"How do you say 'social media'?", a:'las redes sociales', ph:'las RAY-des so-THYAH-les', opts:['las redes sociales','los medios sociales','la red social','el internet'] },
+          { type:'mc', q:"How do you say 'I follow... on Instagram'?", a:'Sigo a... en Instagram', ph:'SEE-go ah en Instagram', opts:['Sigo a... en Instagram','Seguir a... en Instagram','Sigo... Instagram','Estoy siguiendo...'] },
+          { type:'mc', q:"How do you say 'a video clip'?", a:'un videoclip', ph:'oon bee-day-oh-KLEEP', opts:['un videoclip','un vídeo corto','un clip','un short'] },
+          { type:'mc', q:"How do you say 'streaming'?", a:'el streaming', ph:'el STREE-meeng', opts:['el streaming','la transmisión','la emisión','el vídeo en directo'] },
+          { type:'mc', q:"How do you say 'I watch series online'?", a:'Veo series en línea', ph:'BAY-oh SAY-ryays en LEE-nay-ah', opts:['Veo series en línea','Miro series online','Veo series por internet','Veo series digitales'] },
+          { type:'mc', q:"How do you say 'a podcast'?", a:'un podcast', ph:'oon POD-kast', opts:['un podcast','un programa de radio','un audio','una emisión'] },
+          { type:'mc', q:"How do you say 'I upload a photo'?", a:'Subo una foto', ph:'SOO-bo OO-nah FO-to', opts:['Subo una foto','Cargo una foto','Pongo una foto','Publico una foto'] },
+          { type:'mc', q:"How do you say 'I share a video'?", a:'Comparto un vídeo', ph:'kom-PAR-to oon BEE-day-oh', opts:['Comparto un vídeo','Comparto un video','Envío un vídeo','Publico un vídeo'] },
+          { type:'typed', q:"Write: a mobile phone", a:'un móvil', ph:'oon MOH-beel' },
+          { type:'typed', q:"Write: social media", a:'las redes sociales', ph:'las RAY-des so-THYAH-les' },
+          { type:'typed', q:"Write: I watch series online", a:'Veo series en línea', ph:'BAY-oh SAY-ryays en LEE-nay-ah' },
+          { type:'typed', q:"Write: I upload a photo", a:'Subo una foto', ph:'SOO-bo OO-nah FO-to' },
+          { type:'typed', q:"Write: I share a video", a:'Comparto un vídeo', ph:'kom-PAR-to oon BEE-day-oh' },
+        ]
+      },
+      {
+        name: 'El medio ambiente · Environment',
+        desc: 'Talk about the world — B1 topic',
+        timeLimit: 20,
+        qs: [
+          { type:'mc', q:"How do you say 'the environment'?", a:'el medio ambiente', ph:'el MAY-dyoh am-BYEN-tay', opts:['el medio ambiente','la naturaleza','el mundo','el ecosistema'] },
+          { type:'mc', q:"How do you say 'climate change'?", a:'el cambio climático', ph:'el KAM-byoh klee-MAH-tee-ko', opts:['el cambio climático','el cambio del clima','el calentamiento global','el cambio ambiental'] },
+          { type:'mc', q:"How do you say 'pollution'?", a:'la contaminación', ph:'lah kon-tah-mee-nah-THYON', opts:['la contaminación','la polución','el daño ambiental','la suciedad'] },
+          { type:'mc', q:"How do you say 'renewable energy'?", a:'la energía renovable', ph:'lah en-air-HEE-ah ray-no-BAH-blay', opts:['la energía renovable','la energía verde','la energía limpia','la energía solar'] },
+          { type:'mc', q:"How do you say 'to recycle'?", a:'reciclar', ph:'ray-thee-KLAR', opts:['reciclar','reusar','reducir','reutilizar'] },
+          { type:'mc', q:"How do you say 'it is necessary to...'?", a:'es necesario...', ph:'es nay-thay-SAH-ryoh', opts:['es necesario...','es importante...','es obligatorio...','hay que...'] },
+          { type:'mc', q:"How do you say 'we must protect...'?", a:'debemos proteger...', ph:'day-BAY-mos pro-tay-HAIR', opts:['debemos proteger...','tenemos que proteger...','hay que proteger...','podemos proteger...'] },
+          { type:'mc', q:"How do you say 'global warming'?", a:'el calentamiento global', ph:'el kah-len-tah-MYEN-to glo-BAL', opts:['el calentamiento global','el cambio climático','el efecto invernadero','la temperatura global'] },
+          { type:'typed', q:"Write: the environment", a:'el medio ambiente', ph:'el MAY-dyoh am-BYEN-tay' },
+          { type:'typed', q:"Write: climate change", a:'el cambio climático', ph:'el KAM-byoh klee-MAH-tee-ko' },
+          { type:'typed', q:"Write: pollution", a:'la contaminación', ph:'lah kon-tah-mee-nah-THYON' },
+          { type:'typed', q:"Write: to recycle", a:'reciclar', ph:'ray-thee-KLAR' },
+          { type:'typed', q:"Write: it is necessary to...", a:'es necesario...', ph:'es nay-thay-SAH-ryoh' },
+          { type:'typed', q:"Write: we must protect...", a:'debemos proteger...', ph:'day-BAY-mos pro-tay-HAIR' },
+        ]
+      },
+      {
+        name: 'Subjuntivo · Subjunctive intro',
+        desc: 'The tense that marks real fluency',
+        timeLimit: 22,
+        qs: [
+          { type:'mc', q:"How do you say 'I hope that...'?", a:'Espero que...', ph:'es-PAIR-oh kay', opts:['Espero que...','Ojalá...','Espero...','Quiero que...'] },
+          { type:'mc', q:"How do you say 'I want you to...'?", a:'Quiero que tú...', ph:'KYAIR-oh kay too', opts:['Quiero que tú...','Quiero tú...','Quiero que...','Te quiero que...'] },
+          { type:'mc', q:"How do you say 'It is important that you...'?", a:'Es importante que tú...', ph:'es eem-por-TAN-tay kay too', opts:['Es importante que tú...','Es importante tú...','Importa que tú...','Es importante que...'] },
+          { type:'mc', q:"How do you say 'I hope it goes well'?", a:'Espero que vaya bien', ph:'es-PAIR-oh kay BAH-yah bee-EN', opts:['Espero que vaya bien','Espero que va bien','Ojalá va bien','Quiero que vaya bien'] },
+          { type:'mc', q:"How do you say 'Maybe / Perhaps'?", a:'Quizás', ph:'kee-THAS', opts:['Quizás','Tal vez','A lo mejor','Posiblemente'] },
+          { type:'mc', q:"How do you say 'I doubt that...'?", a:'Dudo que...', ph:'DOO-do kay', opts:['Dudo que...','No creo que...','Me parece que no...','No pienso que...'] },
+          { type:'mc', q:"How do you say 'I recommend that...'?", a:'Recomiendo que...', ph:'ray-ko-MYEN-do kay', opts:['Recomiendo que...','Te recomiendo...','Sugiero que...','Propongo que...'] },
+          { type:'mc', q:"How do you say 'when I arrive' (future context)?", a:'cuando llegue', ph:'KWAN-do YAY-gay', opts:['cuando llegue','cuando llego','cuando llegaré','cuando llegué'] },
+          { type:'typed', q:"Write: I hope that...", a:'Espero que...', ph:'es-PAIR-oh kay' },
+          { type:'typed', q:"Write: Maybe / Perhaps", a:'Quizás', ph:'kee-THAS' },
+          { type:'typed', q:"Write: I doubt that...", a:'Dudo que...', ph:'DOO-do kay' },
+          { type:'typed', q:"Write: I hope it goes well", a:'Espero que vaya bien', ph:'es-PAIR-oh kay BAH-yah bee-EN' },
+          { type:'typed', q:"Write: when I arrive (future)", a:'cuando llegue', ph:'KWAN-do YAY-gay' },
+          { type:'typed', q:"Write: I recommend that...", a:'Recomiendo que...', ph:'ray-ko-MYEN-do kay' },
+        ]
+      },
+    ]
+  },
+  {
+    id: 'B2',
+    name: 'Avanzado',
+    badge: '🏆',
+    desc: 'Advanced — fluent, impressive, surprising',
+    bossTarget: 150,
+    bossPraise: '¡Sobresaliente! B2 — you have arrived. Your Spanish teacher would not believe this is the same person.',
+    badgeIrish: 'Hablas español. De verdad.',
+    badgeIrishEn: 'You speak Spanish. For real.',
+    loops: [
+      {
+        name: 'Expresiones · Advanced Expressions',
+        desc: 'Sound like a native speaker',
+        timeLimit: 22,
+        qs: [
+          { type:'mc', q:"How do you say 'It doesn't matter' (colloquial)?", a:'No pasa nada', ph:'no PAH-sah NAH-dah', opts:['No pasa nada','No importa','Da igual','No es nada'] },
+          { type:'mc', q:"How do you say 'Of course!'?", a:'¡Por supuesto!', ph:'por soo-PWES-to', opts:['¡Por supuesto!','¡Claro!','¡Desde luego!','¡Obvio!'] },
+          { type:'mc', q:"How do you say 'What a pity!'?", a:'¡Qué lástima!', ph:'kay LAS-tee-mah', opts:['¡Qué lástima!','¡Qué pena!','¡Qué triste!','¡Qué mal!'] },
+          { type:'mc', q:"How do you say 'It's worth it'?", a:'Vale la pena', ph:'BAH-lay lah PAY-nah', opts:['Vale la pena','Merece la pena','Vale el esfuerzo','Merece'] },
+          { type:'mc', q:"How do you say 'I couldn't care less'?", a:'Me da igual', ph:'may dah ee-GWAL', opts:['Me da igual','No me importa','Me da lo mismo','Es igual'] },
+          { type:'mc', q:"How do you say 'to be in the mood for'?", a:'tener ganas de', ph:'tay-NAIR GAH-nas day', opts:['tener ganas de','querer','apetecer','desear'] },
+          { type:'mc', q:"How do you say 'I fancy going out'?", a:'Tengo ganas de salir', ph:'TEN-go GAH-nas day sah-LEER', opts:['Tengo ganas de salir','Quiero salir','Me apetece salir','Deseo salir'] },
+          { type:'mc', q:"How do you say 'to take advantage of'?", a:'aprovechar', ph:'ah-pro-bay-CHAR', opts:['aprovechar','aprovecharse','beneficiarse','utilizarse'] },
+          { type:'mc', q:"How do you say 'I am going to make the most of my time in Cádiz'?", a:'Voy a aprovechar mi tiempo en Cádiz', ph:'boy ah ah-pro-bay-CHAR mee TYEM-po en KAH-deeth', opts:['Voy a aprovechar mi tiempo en Cádiz','Voy a disfrutar Cádiz','Voy a usar mi tiempo en Cádiz','Quiero aprovechar Cádiz'] },
+          { type:'mc', q:"How do you say 'to get used to'?", a:'acostumbrarse a', ph:'ah-kos-toom-BRAR-say ah', opts:['acostumbrarse a','adaptarse a','habituarse a','familiarizarse con'] },
+          { type:'typed', q:"Write: It doesn't matter (colloquial)", a:'No pasa nada', ph:'no PAH-sah NAH-dah' },
+          { type:'typed', q:"Write: Of course!", a:'¡Por supuesto!', ph:'por soo-PWES-to' },
+          { type:'typed', q:"Write: It's worth it", a:'Vale la pena', ph:'BAH-lay lah PAY-nah' },
+          { type:'typed', q:"Write: I fancy going out", a:'Tengo ganas de salir', ph:'TEN-go GAH-nas day sah-LEER' },
+          { type:'typed', q:"Write: I am going to make the most of my time in Cádiz", a:'Voy a aprovechar mi tiempo en Cádiz', ph:'boy ah ah-pro-bay-CHAR mee TYEM-po en KAH-deeth' },
+          { type:'typed', q:"Write: to get used to", a:'acostumbrarse a', ph:'ah-kos-toom-BRAR-say ah' },
+        ]
+      },
+      {
+        name: 'Ser vs Estar · The Big One',
+        desc: 'Master the hardest part of Spanish',
+        timeLimit: 22,
+        qs: [
+          { type:'mc', q:"'I am Irish' — ser or estar?", a:'Soy irlandés (ser)', ph:'soy eer-lan-DES', opts:['Soy irlandés (ser)','Estoy irlandés (estar)','Soy irlanda (ser)','Estoy de Irlanda (estar)'] },
+          { type:'mc', q:"'I am tired' — ser or estar?", a:'Estoy cansado (estar)', ph:'es-TOY kan-SAH-do', opts:['Estoy cansado (estar)','Soy cansado (ser)','Estoy cansando (estar)','Soy cansado (estar)'] },
+          { type:'mc', q:"'The food is delicious' — ser or estar?", a:'La comida está deliciosa (estar)', ph:'lah ko-MEE-dah es-TAH day-lee-THYOH-sah', opts:['La comida está deliciosa (estar)','La comida es deliciosa (ser)','La comida está delicioso (estar)','La comida es delicioso (ser)'] },
+          { type:'mc', q:"'Music is important' — ser or estar?", a:'La música es importante (ser)', ph:'lah MOO-see-kah es eem-por-TAN-tay', opts:['La música es importante (ser)','La música está importante (estar)','Música es importante (ser)','La música es importantísima (ser)'] },
+          { type:'mc', q:"'The film is boring' (right now) — ser or estar?", a:'La película está aburrida (estar)', ph:'lah pay-LEE-koo-lah es-TAH ah-boo-REE-dah', opts:['La película está aburrida (estar)','La película es aburrida (ser)','El film está aburrido (estar)','La película está aburrido (estar)'] },
+          { type:'mc', q:"'He is a teacher' — ser or estar?", a:'Es profesor (ser)', ph:'es pro-fay-SOR', opts:['Es profesor (ser)','Está profesor (estar)','Es un profesor (ser)','Está de profesor (estar)'] },
+          { type:'mc', q:"'She is in Cádiz' — ser or estar?", a:'Está en Cádiz (estar)', ph:'es-TAH en KAH-deeth', opts:['Está en Cádiz (estar)','Es en Cádiz (ser)','Está a Cádiz (estar)','Es a Cádiz (ser)'] },
+          { type:'mc', q:"'The door is open' — ser or estar?", a:'La puerta está abierta (estar)', ph:'lah PWAIR-tah es-TAH ah-BYAIR-tah', opts:['La puerta está abierta (estar)','La puerta es abierta (ser)','La puerta está abierto (estar)','La puerta es abierto (ser)'] },
+          { type:'mc', q:"'The concert was amazing' (your experience) — ser or estar?", a:'El concierto estuvo increíble (estar)', ph:'el kon-THYAIR-to es-TOO-bo een-kray-EE-blay', opts:['El concierto estuvo increíble (estar)','El concierto fue increíble (ser)','El concierto estaba increíble (estar)','El concierto era increíble (ser)'] },
+          { type:'typed', q:"Write: I am Irish (correct verb)", a:'Soy irlandés', ph:'soy eer-lan-DES' },
+          { type:'typed', q:"Write: I am tired (correct verb)", a:'Estoy cansado', ph:'es-TOY kan-SAH-do' },
+          { type:'typed', q:"Write: She is in Cádiz (correct verb)", a:'Está en Cádiz', ph:'es-TAH en KAH-deeth' },
+          { type:'typed', q:"Write: Music is important (correct verb)", a:'La música es importante', ph:'lah MOO-see-kah es eem-por-TAN-tay' },
+          { type:'typed', q:"Write: The door is open (correct verb)", a:'La puerta está abierta', ph:'lah PWAIR-tah es-TAH ah-BYAIR-tah' },
+          { type:'typed', q:"Write: He is a teacher (correct verb)", a:'Es profesor', ph:'es pro-fay-SOR' },
+        ]
+      },
+      {
+        name: 'Cultura · Culture and Identity',
+        desc: 'Talk about culture, identity, belonging',
+        timeLimit: 22,
+        qs: [
+          { type:'mc', q:"How do you say 'culture'?", a:'la cultura', ph:'lah kool-TOO-rah', opts:['la cultura','la tradición','la sociedad','la civilización'] },
+          { type:'mc', q:"How do you say 'identity'?", a:'la identidad', ph:'lah ee-den-tee-DAD', opts:['la identidad','la personalidad','el carácter','la imagen'] },
+          { type:'mc', q:"How do you say 'tradition'?", a:'la tradición', ph:'lah trah-dee-THYON', opts:['la tradición','la costumbre','la cultura','el hábito'] },
+          { type:'mc', q:"How do you say 'I am proud of'?", a:'Estoy orgulloso de', ph:'es-TOY or-goo-YOH-so day', opts:['Estoy orgulloso de','Soy orgulloso de','Me enorgullezco de','Me siento orgulloso de'] },
+          { type:'mc', q:"How do you say 'to belong to'?", a:'pertenecer a', ph:'pair-tay-nay-THAIR ah', opts:['pertenecer a','ir a','ser de','estar en'] },
+          { type:'mc', q:"How do you say 'diversity'?", a:'la diversidad', ph:'lah dee-bair-see-DAD', opts:['la diversidad','la variedad','la diferencia','la pluralidad'] },
+          { type:'mc', q:"How do you say 'to integrate'?", a:'integrarse', ph:'een-tay-GRAR-say', opts:['integrarse','incorporarse','unirse','adaptarse'] },
+          { type:'mc', q:"How do you say 'I feel at home'?", a:'Me siento como en casa', ph:'may SYEN-to KO-mo en KAH-sah', opts:['Me siento como en casa','Me siento en casa','Estoy como en casa','Me siento cómodo'] },
+          { type:'typed', q:"Write: culture", a:'la cultura', ph:'lah kool-TOO-rah' },
+          { type:'typed', q:"Write: identity", a:'la identidad', ph:'lah ee-den-tee-DAD' },
+          { type:'typed', q:"Write: I am proud of", a:'Estoy orgulloso de', ph:'es-TOY or-goo-YOH-so day' },
+          { type:'typed', q:"Write: diversity", a:'la diversidad', ph:'lah dee-bair-see-DAD' },
+          { type:'typed', q:"Write: I feel at home", a:'Me siento como en casa', ph:'may SYEN-to KO-mo en KAH-sah' },
+          { type:'typed', q:"Write: to integrate", a:'integrarse', ph:'een-tay-GRAR-say' },
+        ]
+      },
+      {
+        name: 'El imperfecto · Imperfect Past',
+        desc: 'Describe how things used to be',
+        timeLimit: 22,
+        qs: [
+          { type:'mc', q:"How do you say 'I used to go'?", a:'iba', ph:'EE-bah', opts:['iba','fui','voy','iré'] },
+          { type:'mc', q:"How do you say 'I used to speak'?", a:'hablaba', ph:'ah-BLAH-bah', opts:['hablaba','hablé','hablaré','hablo'] },
+          { type:'mc', q:"How do you say 'I used to listen to music'?", a:'Escuchaba música', ph:'es-koo-CHAH-bah MOO-see-kah', opts:['Escuchaba música','Escuché música','Escucho música','Escucharé música'] },
+          { type:'mc', q:"How do you say 'when I was young'?", a:'cuando era joven', ph:'KWAN-do AIR-ah HOH-ben', opts:['cuando era joven','cuando fui joven','cuando soy joven','cuando estaba joven'] },
+          { type:'mc', q:"How do you say 'I used to like'?", a:'me gustaba', ph:'may goos-TAH-bah', opts:['me gustaba','me gustó','me gusta','me gustaría'] },
+          { type:'mc', q:"How do you say 'I used to watch films every week'?", a:'Veía películas cada semana', ph:'bay-EE-ah pay-LEE-koo-las KAH-dah say-MAH-nah', opts:['Veía películas cada semana','Vi películas cada semana','Veo películas cada semana','Veré películas cada semana'] },
+          { type:'mc', q:"How do you say 'I used to be shy'?", a:'Era tímido', ph:'AIR-ah TEE-mee-do', opts:['Era tímido','Fui tímido','Soy tímido','Estaba tímido'] },
+          { type:'mc', q:"How do you say 'It used to be different'?", a:'Era diferente', ph:'AIR-ah dee-fair-EN-tay', opts:['Era diferente','Fue diferente','Es diferente','Estaba diferente'] },
+          { type:'typed', q:"Write: I used to go", a:'iba', ph:'EE-bah' },
+          { type:'typed', q:"Write: I used to speak", a:'hablaba', ph:'ah-BLAH-bah' },
+          { type:'typed', q:"Write: when I was young", a:'cuando era joven', ph:'KWAN-do AIR-ah HOH-ben' },
+          { type:'typed', q:"Write: I used to like", a:'me gustaba', ph:'may goos-TAH-bah' },
+          { type:'typed', q:"Write: I used to be shy", a:'Era tímido', ph:'AIR-ah TEE-mee-do' },
+          { type:'typed', q:"Write: I used to watch films every week", a:'Veía películas cada semana', ph:'bay-EE-ah pay-LEE-koo-las KAH-dah say-MAH-nah' },
+        ]
+      },
+      {
+        name: 'Argumentar · Making your Case',
+        desc: 'Debate, argue, persuade — like a B2 student',
+        timeLimit: 22,
+        qs: [
+          { type:'mc', q:"How do you say 'On the one hand'?", a:'Por una parte', ph:'por OO-nah PAR-tay', opts:['Por una parte','Por un lado','Por primera parte','De una parte'] },
+          { type:'mc', q:"How do you say 'On the other hand'?", a:'Por otra parte', ph:'por OH-trah PAR-tay', opts:['Por otra parte','Por otro lado','Por otra cosa','Del otro lado'] },
+          { type:'mc', q:"How do you say 'Furthermore / Moreover'?", a:'Además', ph:'ah-day-MAS', opts:['Además','También','Asimismo','Por añadidura'] },
+          { type:'mc', q:"How do you say 'Nevertheless'?", a:'Sin embargo', ph:'seen em-BAR-go', opts:['Sin embargo','No obstante','Aun así','A pesar de eso'] },
+          { type:'mc', q:"How do you say 'As a result'?", a:'Como resultado', ph:'KO-mo ray-sool-TAH-do', opts:['Como resultado','Por lo tanto','Por ende','Por consiguiente'] },
+          { type:'mc', q:"How do you say 'It is clear that...'?", a:'Está claro que...', ph:'es-TAH KLA-ro kay', opts:['Está claro que...','Es claro que...','Claramente...','Evidentemente...'] },
+          { type:'mc', q:"How do you say 'The evidence shows that...'?", a:'La evidencia muestra que...', ph:'lah ay-bee-DEN-thyah MWES-trah kay', opts:['La evidencia muestra que...','La evidencia dice que...','Los datos muestran que...','Se puede ver que...'] },
+          { type:'mc', q:"How do you say 'To sum up'?", a:'En resumen', ph:'en ray-SOO-men', opts:['En resumen','Para resumir','En conclusión','Para concluir'] },
+          { type:'mc', q:"How do you say 'I would argue that...'?", a:'Yo argumentaría que...', ph:'yo ar-goo-men-tah-REE-ah kay', opts:['Yo argumentaría que...','Yo diría que...','Yo opinaría que...','Sostendría que...'] },
+          { type:'typed', q:"Write: On the one hand", a:'Por una parte', ph:'por OO-nah PAR-tay' },
+          { type:'typed', q:"Write: On the other hand", a:'Por otra parte', ph:'por OH-trah PAR-tay' },
+          { type:'typed', q:"Write: Furthermore", a:'Además', ph:'ah-day-MAS' },
+          { type:'typed', q:"Write: Nevertheless", a:'Sin embargo', ph:'seen em-BAR-go' },
+          { type:'typed', q:"Write: To sum up", a:'En resumen', ph:'en ray-SOO-men' },
+          { type:'typed', q:"Write: It is clear that...", a:'Está claro que...', ph:'es-TAH KLA-ro kay' },
+        ]
+      },
+      {
+        name: 'La música avanzada · Music Deep Dive',
+        desc: 'Talk about music at B2 level',
+        timeLimit: 22,
+        qs: [
+          { type:'mc', q:"How do you say 'the rhythm'?", a:'el ritmo', ph:'el REET-mo', opts:['el ritmo','el compás','el tempo','la cadencia'] },
+          { type:'mc', q:"How do you say 'the lyrics'?", a:'la letra', ph:'lah LAY-trah', opts:['la letra','las palabras','el texto','el poema'] },
+          { type:'mc', q:"How do you say 'the melody'?", a:'la melodía', ph:'lah may-lo-DEE-ah', opts:['la melodía','el ritmo','la armonía','el coro'] },
+          { type:'mc', q:"How do you say 'the chorus'?", a:'el estribillo', ph:'el es-tree-BEE-yo', opts:['el estribillo','el coro','la estrofa','el puente'] },
+          { type:'mc', q:"How do you say 'This song moves me'?", a:'Esta canción me emociona', ph:'ES-tah kan-THYON may ay-mo-THYOH-nah', opts:['Esta canción me emociona','Esta canción me mueve','Esta canción me gusta','Esta canción me afecta'] },
+          { type:'mc', q:"How do you say 'live music'?", a:'la música en directo', ph:'lah MOO-see-kah en dee-REK-to', opts:['la música en directo','la música en vivo','la música live','la música real'] },
+          { type:'mc', q:"How do you say 'I play the guitar'?", a:'Toco la guitarra', ph:'TOH-ko lah ghee-TAR-rah', opts:['Toco la guitarra','Juego la guitarra','Hago la guitarra','Uso la guitarra'] },
+          { type:'mc', q:"How do you say 'Music connects people'?", a:'La música une a las personas', ph:'lah MOO-see-kah OO-nay ah las pair-SOH-nas', opts:['La música une a las personas','La música conecta personas','La música junta a la gente','La música acerca a todos'] },
+          { type:'typed', q:"Write: the rhythm", a:'el ritmo', ph:'el REET-mo' },
+          { type:'typed', q:"Write: the lyrics", a:'la letra', ph:'lah LAY-trah' },
+          { type:'typed', q:"Write: the chorus", a:'el estribillo', ph:'el es-tree-BEE-yo' },
+          { type:'typed', q:"Write: This song moves me", a:'Esta canción me emociona', ph:'ES-tah kan-THYON may ay-mo-THYOH-nah' },
+          { type:'typed', q:"Write: I play the guitar", a:'Toco la guitarra', ph:'TOH-ko lah ghee-TAR-rah' },
+          { type:'typed', q:"Write: live music", a:'la música en directo', ph:'lah MOO-see-kah en dee-REK-to' },
+        ]
+      },
+      {
+        name: 'La moda · Fashion and Style',
+        desc: 'Style, fashion, self-expression — Jim\'s final level',
+        timeLimit: 22,
+        qs: [
+          { type:'mc', q:"How do you say 'fashion'?", a:'la moda', ph:'lah MOH-dah', opts:['la moda','el estilo','la ropa','la tendencia'] },
+          { type:'mc', q:"How do you say 'style'?", a:'el estilo', ph:'el es-TEE-lo', opts:['el estilo','la moda','el gusto','el look'] },
+          { type:'mc', q:"How do you say 'I express myself through fashion'?", a:'Me expreso a través de la moda', ph:'may eks-PRAY-so ah trah-BAYS day lah MOH-dah', opts:['Me expreso a través de la moda','Me expreso con ropa','Expreso mi estilo','Me identifico con la moda'] },
+          { type:'mc', q:"How do you say 'brand'?", a:'la marca', ph:'lah MAR-kah', opts:['la marca','el diseño','la etiqueta','el logo'] },
+          { type:'mc', q:"How do you say 'second-hand'?", a:'de segunda mano', ph:'day say-GOON-dah MAH-no', opts:['de segunda mano','usado','vintage','de segunda'] },
+          { type:'mc', q:"How do you say 'sustainable fashion'?", a:'la moda sostenible', ph:'lah MOH-dah sos-tay-NEE-blay', opts:['la moda sostenible','la moda ecológica','la moda verde','la moda ética'] },
+          { type:'mc', q:"How do you say 'It suits you' / 'It fits you well'?", a:'Te queda bien', ph:'tay KAY-dah bee-EN', opts:['Te queda bien','Te va bien','Te sienta bien','Te queda perfecto'] },
+          { type:'mc', q:"How do you say 'self-expression'?", a:'la autoexpresión', ph:'lah ow-to-eks-pray-SYON', opts:['la autoexpresión','la expresión personal','la expresión propia','la expresión de uno mismo'] },
+          { type:'mc', q:"How do you say 'Fashion is a form of art'?", a:'La moda es una forma de arte', ph:'lah MOH-dah es OO-nah FOR-mah day AR-tay', opts:['La moda es una forma de arte','La moda es arte','La ropa es una forma de arte','La moda es artística'] },
+          { type:'typed', q:"Write: fashion", a:'la moda', ph:'lah MOH-dah' },
+          { type:'typed', q:"Write: style", a:'el estilo', ph:'el es-TEE-lo' },
+          { type:'typed', q:"Write: second-hand", a:'de segunda mano', ph:'day say-GOON-dah MAH-no' },
+          { type:'typed', q:"Write: It suits you / It fits you well", a:'Te queda bien', ph:'tay KAY-dah bee-EN' },
+          { type:'typed', q:"Write: sustainable fashion", a:'la moda sostenible', ph:'lah MOH-dah sos-tay-NEE-blay' },
+          { type:'typed', q:"Write: I express myself through fashion", a:'Me expreso a través de la moda', ph:'may eks-PRAY-so ah trah-BAYS day lah MOH-dah' },
+        ]
+      },
+    ]
+  },
+];
+const SAVE_KEY = 'turboEspanolJim1';
+
+// ── STATE ──
+let save, G, B, _livesBack;
+
+function initState() {
+  try { save = JSON.parse(localStorage.getItem(SAVE_KEY)) || {lives:5,levels:{}}; }
+  catch(e) { save = {lives:5,levels:{}}; }
+  G = {level:null,loopIdx:0,queue:[],qi:0,answered:false,score:0,stars:0,hintUsed:false,timeouts:0,wrongs:0,requeued:null,timer:null,t:0};
+  B = {level:null,queue:[],qi:0,answered:false,elapsed:0,penalties:0,usedVowels:new Set(),revealedVowels:new Set(),wrongs:0,timer:null};
+  _livesBack = 'homeScreen';
+}
+
+function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch(e){} }
+
+// ── SCREEN ──
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(s){ s.style.display='none'; });
+  var el = document.getElementById(id);
+  if (el) { el.style.display='block'; el.scrollTop=0; }
+}
+
+// ── AUDIO ──
+var AC = null;
+try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){}
+function beep(freq,dur,type,vol) {
+  if (!AC) return;
+  type = type||'sine'; vol = vol||0.3;
+  try {
+    var o=AC.createOscillator(), g=AC.createGain();
+    o.connect(g); g.connect(AC.destination);
+    o.frequency.value=freq; o.type=type;
+    g.gain.setValueAtTime(vol, AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime+dur);
+    o.start(); o.stop(AC.currentTime+dur);
+  } catch(e){}
+}
+function ding(){ beep(880,.15); setTimeout(function(){beep(1100,.12);},120); }
+function dong(){ beep(220,.4,'sawtooth',.2); }
+function chime(){ beep(880,.2); setTimeout(function(){beep(1100,.2);},200); setTimeout(function(){beep(1320,.2);},400); setTimeout(function(){beep(1760,.4);},600); }
+
+// ── TTS ──
+var TTS_ON = true;
+function speakText(txt) {
+  if (!TTS_ON || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  var u = new SpeechSynthesisUtterance(txt);
+  u.lang = 'es-ES'; u.rate = 0.88; u.pitch = 1;
+  window.speechSynthesis.speak(u);
+}
+function initTTSToggle() {
+  var btn = el('ttsToggle');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    TTS_ON = !TTS_ON;
+    btn.textContent = TTS_ON ? '🔊 Read' : '🔇 Read';
+    btn.className = TTS_ON ? '' : 'off';
+    if (!TTS_ON) window.speechSynthesis && window.speechSynthesis.cancel();
+  });
+}
+
+// ── VOICE INPUT ──
+var SRec = null;
+var voiceListening = false;
+function initVoice() {
+  var Cls = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!Cls) return;
+  SRec = new Cls();
+  SRec.lang = 'es-ES'; SRec.continuous = false; SRec.interimResults = false;
+  SRec.onresult = function(e) {
+    var t = e.results[0][0].transcript;
+    el('typedInput').value = t;
+    voiceListening = false;
+    el('voiceBtn').className = '';
+    el('voiceBtn').textContent = '🎤 Di la respuesta · Speak';
+    submitTyped();
+  };
+  SRec.onerror = function() { voiceListening = false; el('voiceBtn').className=''; el('voiceBtn').textContent='🎤 Di la respuesta · Speak'; };
+  SRec.onend   = function() { voiceListening = false; el('voiceBtn').className=''; el('voiceBtn').textContent='🎤 Di la respuesta · Speak'; };
+  el('voiceBtn').style.display = 'block';
+  el('voiceBtn').addEventListener('click', function() {
+    if (G.answered) return;
+    if (voiceListening) { SRec.stop(); return; }
+    voiceListening = true;
+    el('voiceBtn').className = 'listening';
+    el('voiceBtn').textContent = '🔴 Escuchando · Listening…';
+    SRec.start();
+  });
+}
+
+// ── DIFF HIGHLIGHT ──
+function diffHighlight(user, correct) {
+  var u = user || ''; var c = correct;
+  var html = '';
+  var maxLen = Math.max(u.length, c.length);
+  for (var i = 0; i < c.length; i++) {
+    var uc = u[i] || '';
+    if (uc.toLowerCase() === c[i].toLowerCase()) {
+      html += '<span style="color:#c0392b">' + c[i] + '</span>';
+    } else {
+      html += '<span class="diff-char">' + c[i] + '</span>';
+    }
+  }
+  return html;
+}
+
+// ── PER-QUESTION HISTORY ──
+var G_history = [];
+
+
+function shuffle(a) {
+  var b=a.slice();
+  for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}
+  return b;
+}
+function normalise(s) {
+  return s.toLowerCase()
+    .replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u')
+    .replace(/[^a-z0-9\s']/g,'').replace(/\s+/g,' ').trim();
+}
+function fuzzy(a,b) {
+  if(Math.abs(a.length-b.length)>3) return false;
+  var d=0;
+  for(var i=0;i<Math.max(a.length,b.length);i++) if(a[i]!==b[i]&&++d>2) return false;
+  return true;
+}
+function el(id){ return document.getElementById(id); }
+function setText(id,txt){ var e=el(id); if(e) e.textContent=txt; }
+function setHTML(id,html){ var e=el(id); if(e) e.innerHTML=html; }
+function btn(id,fn){ var e=el(id); if(e) e.addEventListener('click',fn); }
+function mkBtn(parent, cls, html, fn) {
+  var b=document.createElement('button');
+  b.className=cls; b.innerHTML=html;
+  b.addEventListener('click',fn);
+  parent.appendChild(b);
+  return b;
+}
+
+// ── LIVES ──
+function renderLives() {
+  var e=el('livesDisplay'); if(!e) return;
+  e.innerHTML='';
+  for(var i=0;i<5;i++){
+    var s=document.createElement('span');
+    s.className='life'+(i>=save.lives?' empty':'');
+    s.textContent='💚'; e.appendChild(s);
+  }
+}
+
+// ── PROVERBS ──
+var PROVERBS=[
+  'La práctica hace al maestro · Practice makes perfect',
+  'El que no arriesga, no gana · Nothing ventured, nothing gained',
+  'Beagán ar bheagán · Little by little — sure look it',
+  'Tús maith is leath na hoibre · A good start is half the work',
+  'Mol an óige agus tiocfaidh sí · Back yourself, Jim',
+  'No hay atajo sin trabajo · No shortcut without the graft',
+  'A cada cerdo le llega su San Martín · Every dog has his day, Jim',
+  'Is fearr Español bhriste ná Béarla cliste · Broken Spanish beats clever English',
+  'Camarón que se duerme, se lo lleva la corriente · Snooze and you lose',
+  'Cádiz is waiting. ¡Vamos!',
+];
+
+// ── HOME ──
+function buildHome() {
+  var earned=LEVELS.filter(function(lv){return (save.levels[lv.id]||{}).badge;});
+  var moons=['🌑','🌒','🌓','🌔'];
+  var icon = earned.length===0?'🌑':earned.length===LEVELS.length?'🌕':earned[earned.length-1].badge;
+  setText('homeIcon', icon);
+  setText('badgeRow', LEVELS.map(function(lv,i){return (save.levels[lv.id]||{}).badge?lv.badge:moons[Math.min(i,3)];}).join(' '));
+
+  var anyProgress = Object.keys(save.levels).length>0;
+  var pos='';
+  for(var i=0;i<LEVELS.length;i++){
+    var lv=LEVELS[i]; var lvs=save.levels[lv.id]||{};
+    if(!lvs.badge){
+      var ld=lvs.loopsDone||0;
+      var ln=lv.loops[ld]?lv.loops[ld].name:lv.loops[lv.loops.length-1].name;
+      pos=lv.id+' · Ronda '+(ld+1)+': '+ln; break;
+    }
+  }
+  setText('homeMsg', anyProgress?(pos?'Continuando: '+pos:(earned.length===LEVELS.length?'¡Todo hecho! Cádiz ready 🏆':'¡Sigue adelante! Cádiz is waiting.')):'Alright Jim. Let\'s get you ready for Cádiz. ¡Vamos!');
+  setText('homeProverb', PROVERBS[Math.floor(Math.random()*PROVERBS.length)]);
+  setText('homeStartBtn', anyProgress?'¡Continúa! · Keep going →':'☀️ ¡Empieza! · Let\'s go →');
+  el('homeLevelsBtn').style.display = anyProgress?'block':'none';
+  el('homeLivesBtn').style.display  = anyProgress?'block':'none';
+
+  // Build levels list
+  var wrap=el('levelsWrap'); wrap.innerHTML='';
+  LEVELS.forEach(function(lv,idx){
+    var lvs=save.levels[lv.id]||{};
+    var prev = idx===0?true:!!(save.levels[(LEVELS[idx-1]||{}).id]||{}).badge;
+    var hasBadge=!!lvs.badge; var ld=lvs.loopsDone||0;
+    var row=document.createElement('div');
+    row.className='lv-row'+(hasBadge?' done':'')+(prev?'':' locked');
+    row.innerHTML='<div class="lv-icon'+(hasBadge?' done':'')+'">'+( prev?lv.badge:'🔒')+'</div>'
+      +'<div class="lv-info"><div class="lv-name">'+lv.id+' · '+lv.name+'</div>'
+      +'<div class="lv-desc">'+lv.desc+'</div>'
+      +(prev?'<div class="lv-prog">'+(hasBadge?'✓ Completo':'Ronda '+ld+'/'+lv.loops.length)+'</div>':'')
+      +'</div>';
+    if(prev){ (function(L){ row.addEventListener('click',function(){ openLevel(L.id); }); })(lv); }
+    wrap.appendChild(row);
+  });
+}
+
+function goHome() {
+  clearInterval(G.timer); clearInterval(B.timer); G.timer=null; B.timer=null;
+  buildHome(); show('homeScreen');
+}
+
+function handleStart() {
+  for(var i=0;i<LEVELS.length;i++){
+    var lv=LEVELS[i]; var lvs=save.levels[lv.id]||{};
+    if(!lvs.badge){
+      G.level=lv;
+      var ld=lvs.loopsDone||0;
+      if(ld>=lv.loops.length){ openBoss(lv.id); }
+      else { G.loopIdx=ld; startLoop(G.loopIdx); }
+      return;
+    }
+  }
+  buildHome(); show('levelsScreen');
+}
+
+function showLevels(){ buildHome(); show('levelsScreen'); }
+
+// ── LEVEL INTRO ──
+function openLevel(id) {
+  G.level=LEVELS.filter(function(l){return l.id===id;})[0];
+  var lvs=save.levels[id]||{};
+  G.loopIdx=Math.min(lvs.loopsDone||0, G.level.loops.length-1);
+  setText('introBadge', G.level.badge);
+  setText('introLevel', G.level.id);
+  setText('introName',  G.level.name);
+  setText('introDesc',  G.level.desc);
+  setText('introLoops', G.level.loops.length+' lúb · loops');
+  show('introScreen');
+}
+function startFirstLoop(){ startLoop(G.loopIdx); }
+
+// ── QUEUE ──
+function buildQueue(qs) {
+  var expanded=qs.slice();
+  qs.forEach(function(q){
+    if(q.type==='mc'){
+      var g=q.q.match(/How do you say '(.+)'\??/i);
+      if(g&&q.ph){
+        var distractors=qs.filter(function(o){return o!==q;}).map(function(o){var m=o.q.match(/How do you say '(.+)'\??/i);return m?m[1]:null;}).filter(Boolean);
+        var opts=[g[1]].concat(shuffle(distractors.filter(function(d){return d!==g[1];})).slice(0,3));
+        if(opts.length===4&&q.a&&g[1]&&g[1].length>2)
+          expanded.push({type:'bridge',q:'What does this mean?',irish:q.a,a:g[1],ph:q.ph,opts:shuffle(opts)});
+      }
+    }
+    if(q.type==='bridge'&&q.irish){
+      var pool=qs.filter(function(o){return o!==q&&o.type==='bridge'&&o.irish&&o.irish!==q.irish&&o.irish.length>2;}).map(function(o){return o.irish;});
+      var rOpts=[q.irish].concat(shuffle(pool.filter(function(i){return i!==q.irish;})).slice(0,3));
+      if(rOpts.length===4&&q.a&&q.a.length>2)
+        expanded.push({type:'mc',q:"How do you say '"+q.a+"' in Irish?",a:q.irish,ph:q.ph,opts:shuffle(rOpts)});
+    }
+  });
+  var typed=shuffle(expanded.filter(function(q){return q.type==='typed';}));
+  var other=shuffle(expanded.filter(function(q){return q.type!=='typed';}));
+  var tp=typed.slice(0,Math.min(3,typed.length));
+  var op=other.slice(0,Math.max(0,20-tp.length));
+  return shuffle(op.filter(function(q){return q.type==='mc';})).concat(shuffle(op.filter(function(q){return q.type==='bridge';}))).concat(tp);
+}
+
+function startLoop(idx) {
+  G.loopIdx=idx; var loop=G.level.loops[idx];
+  G.queue=buildQueue(loop.qs); G.qi=0; G.score=0; G.stars=0;
+  G.answered=false; G.timeouts=0; G.wrongs=0; G.requeued=new Set();
+  G_history=[];
+  setText('gInfo', G.level.id+' · '+loop.name);
+  setText('gStars','0');
+  show('gameScreen'); renderQ();
+}
+
+// ── RENDER Q ──
+function renderQ() {
+  var q=G.queue[G.qi];
+  G.answered=false; G.hintUsed=false;
+  setText('qProg',(G.qi+1)+' / 20');
+  el('progressBar').style.width=Math.round((G.qi/20)*100)+'%';
+  el('fb').style.display='none';
+  el('btnNext').style.display='none';
+  el('mcWrap').style.display='none';
+  el('mcHintRow').style.display='none';
+  el('bridgeIrish').style.display='none';
+  el('bridgePh').style.display='none';
+  el('typedWrap').style.display='none';
+
+  if(q.type==='mc'||q.type==='bridge'){
+    setText('qType', q.type==='mc'?'Elige · Choose':'Lee · Read');
+    setText('qText', q.type==='bridge'?'— '+q.q:q.q);
+    if(q.type==='bridge'){
+      el('bridgeIrish').textContent=q.irish; el('bridgeIrish').style.display='block';
+      el('bridgePh').textContent='/'+q.ph+'/'; el('bridgePh').style.display='block';
+    }
+    el('mcHintRow').style.display='block';
+    setText('mcHintLives', save.lives);
+    el('mcWrap').style.display='flex';
+    renderMC(q);
+    if(q.type==='bridge') speakText(q.irish);
+  } else {
+    setText('qType','Escribe · Write');
+    setText('qText', q.q);
+    el('typedWrap').style.display='block';
+    var inp=el('typedInput');
+    inp.value=''; inp.className='typed-input'; inp.disabled=false;
+    setText('hintLives', save.lives);
+    setTimeout(function(){inp.focus();},80);
+    // Speak the Spanish answer for hear-and-repeat
+    if(q.a) speakText(q.a);
+  }
+  startTimer(G.level.loops[G.loopIdx].timeLimit);
+}
+
+function renderMC(q) {
+  var wrap=el('mcWrap'); wrap.innerHTML='';
+  shuffle(q.opts.slice()).forEach(function(opt){
+    var b=document.createElement('button');
+    b.className='mc-btn';
+    b.innerHTML='<span class="mc-txt">'+opt+'</span><span class="mc-ph">/'+(q.ph||'')+'/</span>';
+    (function(o,qq,bb){ b.addEventListener('click',function(){ if(!G.answered) pickMC(o,qq,bb); }); })(opt,q,b);
+    wrap.appendChild(b);
+  });
+}
+
+// ── TIMER ──
+function startTimer(limit) {
+  clearInterval(G.timer); G.t=limit; updateBar(limit,limit);
+  G.timer=setInterval(function(){ G.t-=0.1; updateBar(G.t,limit); if(G.t<=0){clearInterval(G.timer);timeUp();} },100);
+}
+function updateBar(t,limit){
+  var pct=Math.max(0,(t/limit)*100);
+  el('timerBar').style.width=pct+'%';
+  el('timerBar').style.background=pct<25?'#c94c4c':pct<50?'#c9a84c':'#2a5a3a';
+}
+function timeUp(){
+  if(G.answered) return; G.answered=true; G.timeouts++; dong();
+  var q=G.queue[G.qi];
+  document.querySelectorAll('.mc-btn').forEach(function(b){
+    b.classList.add('revealed');
+    if(b.querySelector('.mc-txt').textContent===q.a) b.classList.add('correct');
+  });
+  var k=q.a+q.q; if(!G.requeued.has(k)){G.requeued.add(k);G.queue.push(Object.assign({},q));}
+  showFBTimeout(q);
+}
+
+// ── ANSWERS ──
+function pickMC(chosen,q,btn){
+  if(G.answered) return; G.answered=true; clearInterval(G.timer);
+  var ok=chosen===q.a;
+  document.querySelectorAll('.mc-btn').forEach(function(b){
+    b.classList.add('revealed');
+    var t=b.querySelector('.mc-txt').textContent;
+    if(t===q.a) b.classList.add('correct');
+    else if(t===chosen&&!ok){b.classList.add('wrong');b.classList.add('faded');}
+    else if(t!==q.a) b.classList.add('faded');
+  });
+  if(ok){G.score++;G.stars+=2;}
+  else{G.wrongs++;var k=q.a+q.q;if(G.requeued&&!G.requeued.has(k)){G.requeued.add(k);G.queue.push(Object.assign({},q));}}
+  G_history.push({q:q.q,a:q.a,user:chosen,ok:ok,type:'mc'});
+  setText('gStars',G.stars);
+  showFB(ok,q,false,ok?2:0,null);
+}
+
+function useHint(){
+  if(save.lives<=0) return;
+  var q=G.queue[G.qi]; save.lives=Math.max(0,save.lives-1); persist(); renderLives(); G.hintUsed=true;
+  var inp=el('typedInput'); inp.value=q.a[0]; inp.focus();
+  setText('hintLives',save.lives);
+}
+
+function useMCHint(){
+  if(G.answered||save.lives<=0) return;
+  save.lives=Math.max(0,save.lives-1); persist(); renderLives();
+  var btns=Array.prototype.slice.call(document.querySelectorAll('.mc-btn'));
+  var wrongs=btns.filter(function(b){return b.querySelector('.mc-txt').textContent!==G.queue[G.qi].a;});
+  shuffle(wrongs).slice(0,2).forEach(function(b){b.classList.add('faded');b.disabled=true;});
+  setText('mcHintLives',save.lives);
+}
+
+function submitTyped(){
+  if(G.answered) return;
+  var inp=el('typedInput'); var raw=inp.value.trim(); if(!raw) return;
+  G.answered=true; clearInterval(G.timer);
+  var q=G.queue[G.qi]; var norm=normalise(raw);
+  var ok=norm===normalise(q.a)||(q.alt||[]).map(normalise).indexOf(norm)>=0||fuzzy(norm,normalise(q.a));
+  var exactFada=raw.toLowerCase()===q.a.toLowerCase();
+  inp.className='typed-input '+(ok?'ok':'bad'); inp.disabled=true;
+  G_history.push({q:q.q,a:q.a,user:raw,ok:ok,type:'typed'});
+  if(ok){
+    G.score++; var st=G.hintUsed?1:(exactFada?3:2); G.stars+=st;
+    setText('gStars',G.stars); showFB(true,q,exactFada&&!G.hintUsed,st,null);
+  } else {
+    G.wrongs++; var k=q.a+q.q; if(G.requeued&&!G.requeued.has(k)){G.requeued.add(k);G.queue.push(Object.assign({},q));}
+    showFB(false,q,false,0,raw);
+  }
+}
+
+// ── FEEDBACK ──
+function showFB(ok,q,exactFada,stars,userAnswer){
+  ok?ding():dong();
+  if(!ok && q.a) speakText(q.a);
+  var fb=el('fb'); fb.style.display='flex';
+  var res=el('fbResult'); res.className='fb-result '+(ok?'ok':'bad');
+  res.innerHTML=ok?(exactFada?'🌟 ¡Perfecto! <span style="font-weight:400;font-size:.85em">Accent an\' all — deadly!</span>':'✓ ¡Correcto! <span style="font-weight:400;font-size:.85em">Sound, Jim. ¡Bien!</span>'):'✗ Incorrecto <span style="font-weight:400;font-size:.85em">Nearly — have another look</span>';
+  var ans=el('fbAns');
+  if(ok) ans.innerHTML='<span style="color:#1a7a2a;font-weight:700">'+q.a+'</span>';
+  else if(userAnswer) {
+    var diffHtml = diffHighlight(userAnswer, q.a);
+    ans.innerHTML='<span style="color:#c0392b;text-decoration:line-through;font-size:.82rem">'+userAnswer+'</span>'
+      +' → <span style="font-weight:700">'+diffHtml+'</span>';
+  }
+  else ans.innerHTML='<span style="color:#666;font-size:.8rem">Freagra: </span><span>'+q.a+'</span>';
+  setText('fbPh', q.ph?'/'+q.ph+'/':'');
+  setText('fbBonus', (ok&&exactFada)?'FADA BONUS ★':'');
+  el('mcWrap').style.display='none'; el('mcHintRow').style.display='none';
+  el('bridgeIrish').style.display='none'; el('bridgePh').style.display='none';
+  el('typedWrap').style.display='none';
+  el('btnNext').style.display='block';
+}
+
+function showFBTimeout(q){
+  G_history.push({q:q.q,a:q.a,user:'⏱',ok:false,type:'timeout'});
+  var fb=el('fb'); fb.style.display='flex';
+  el('fbResult').className='fb-result bad';
+  el('fbResult').innerHTML='⏱ ¡Demasiado lento! <span style="font-weight:400;font-size:.85em">Too slow!</span>';
+  el('fbAns').innerHTML='<span style="color:#666;font-size:.8rem">Freagra: </span><span style="color:#1a7a2a;font-weight:700">'+q.a+'</span>';
+  setText('fbPh', q.ph?'/'+q.ph+'/':''); setText('fbBonus','');
+  el('mcWrap').style.display='none'; el('mcHintRow').style.display='none';
+  el('bridgeIrish').style.display='none'; el('bridgePh').style.display='none';
+  el('typedWrap').style.display='none';
+  el('btnNext').style.display='block';
+}
+
+function nextQ(){ G.qi++; if(G.qi>=G.queue.length) endLoop(); else renderQ(); }
+
+// ── END LOOP ──
+function endLoop(){
+  clearInterval(G.timer);
+  var correct=G.score; var perfect=correct===20; var passed=correct>=14;
+  var lvs=save.levels[G.level.id]||{};
+  if(passed&&(lvs.loopsDone||0)<=G.loopIdx) lvs.loopsDone=G.loopIdx+1;
+  var sc=perfect?5:correct>=19?4:correct>=17?3:correct>=14?2:correct>=10?1:0;
+  if(!lvs.loopStars) lvs.loopStars={};
+  if(sc>(lvs.loopStars[G.loopIdx]||0)) lvs.loopStars[G.loopIdx]=sc;
+  if(perfect){save.lives=Math.min(5,save.lives+1);renderLives();}
+  save.levels[G.level.id]=lvs; persist();
+  var levelComplete=passed&&(lvs.loopsDone||0)>=G.level.loops.length;
+
+  setText('loopIcon', perfect?'🌟':passed?'✅':'🔄');
+  setText('loopTitle', perfect?'¡Perfecto! Deadly!':passed?'¡Bueno! Keep going!':'Inténtalo de nuevo');
+  setText('loopStars', perfect?'★★★★★':correct>=19?'★★★★':correct>=17?'★★★':correct>=14?'★★':correct>=10?'★':'☆☆☆☆☆');
+  setText('loopScore', correct+' / 20 — ' + (perfect?'flawless, Jim!':correct>=17?'class':correct>=14?'sound':'not bad'));
+  setText('loopMsg', perfect?'20 out of 20. Pure class. ¡Perfecto!':passed?'Round done — on to the next. ¡Vamos!':'Ah look, try it again. You\'ll get it.');
+  var parts=[]; if(G.wrongs>0) parts.push(G.wrongs+' wrong'); if(G.timeouts>0) parts.push(G.timeouts+' too slow');
+  setText('loopLife', perfect?'💛 ¡Vida ganada! Extra life — fair play!':passed?(parts.join(' · ')||''):'Keep at it, Jim — '+parts.join(' · '));
+
+  var notice=el('loopNotice');
+  if(levelComplete){
+    notice.innerHTML='<strong>⚔️ El Jefe · The Boss</strong><br>Todas las rondas completas · All loops done.<br>• Solo respuestas escritas · El reloj sube · Error = +30s<br>Objetivo · Target: <strong>'+Math.floor(G.level.bossTarget/60)+':'+('0'+G.level.bossTarget%60).slice(-2)+'</strong>';
+    notice.style.display='block';
+  } else { notice.style.display='none'; }
+
+  // Build loop summary
+  var sumDiv=el('loopSummary'); var sumRows=el('loopSummaryRows');
+  var wrongs=G_history.filter(function(h){return !h.ok;});
+  if(wrongs.length>0){
+    sumRows.innerHTML='';
+    wrongs.forEach(function(h){
+      var row=document.createElement('div');
+      row.className='sum-row';
+      var qLabel=h.q.replace(/^Write: /i,'').replace(/^How do you say /i,'').replace(/['"?]/g,'');
+      if(h.type==='timeout'){
+        row.innerHTML='<span class="sum-q">'+qLabel+'</span>'
+          +'<span style="color:#c0392b">⏱ Too slow</span>'
+          +' → <span style="color:#1a7a2a;font-weight:700">'+h.a+'</span>';
+      } else {
+        var diffHtml=diffHighlight(h.user,h.a);
+        row.innerHTML='<span class="sum-q">'+qLabel+'</span>'
+          +(h.user?'<span style="color:#c0392b;text-decoration:line-through;font-size:.78rem">'+h.user+'</span> → ':'')
+          +'<span style="font-weight:700">'+diffHtml+'</span>';
+      }
+      sumRows.appendChild(row);
+    });
+    sumDiv.style.display='block';
+  } else {
+    sumDiv.style.display='none';
+  }
+
+  var wrap=el('loopBtns'); wrap.innerHTML='';
+  if(levelComplete){
+    (function(lvl){ mkBtn(wrap,'btn btn-p','⚔️ ¡Enfrenta al Jefe!<br><small>Supéralo para ganar tu insignia '+lvl.badge+'</small>',function(){openBoss(lvl.id);}); })(G.level);
+  } else if(passed){
+    var nl=G.level.loops[G.loopIdx+1];
+    (function(idx,loop){ mkBtn(wrap,'btn btn-p', loop?'Ronda '+(idx+2)+': '+loop.name+' →':'¡Siguiente! →', function(){startLoop(idx+1);}); })(G.loopIdx, nl);
+  }
+  (function(idx){ mkBtn(wrap,'btn btn-s', passed?'↺ Repetir · Again':'↺ Intentar de nuevo · Try again', function(){startLoop(idx);}); })(G.loopIdx);
+  mkBtn(wrap,'btn btn-s','← Inicio · Home', goHome);
+  show('loopScreen');
+}
+
+// ── BOSS INTRO ──
+function openBoss(levelId){
+  B.level=LEVELS.filter(function(l){return l.id===levelId;})[0];
+  var lv=B.level;
+  var m=Math.floor(lv.bossTarget/60); var s=lv.bossTarget%60;
+  setText('bossIntroTitle','⚔️ '+lv.id+' · El Jefe · The Boss');
+  setText('bossIntroDesc','Has completado todas las rondas. · All loops done. ¡Ahora la prueba final! · Now the final test.');
+  setHTML('bossRules','⏱ El tiempo sube · Time counts up<br>✗ Respuesta incorrecta · Wrong: <strong>+30s</strong><br>⏰ Sin respuesta · Blank: <strong>+45s</strong><br>💛 Pista: elige una vocal, gratis, sin penalización<br>📝 Todo escrito · All typed');
+  setText('bossTargetMsg','Objetivo · Target: '+m+':'+('0'+s).slice(-2)+' · '+lv.id+' Boss');
+  show('bossIntroScreen');
+}
+
+// ── BOSS GAME ──
+function startBoss(){
+  var lv=B.level; var allTyped=[];
+  lv.loops.forEach(function(loop){ loop.qs.filter(function(q){return q.type==='typed';}).forEach(function(q){allTyped.push(q);}); });
+  var allMC=[];
+  lv.loops.forEach(function(loop){
+    loop.qs.filter(function(q){return q.type==='mc'&&q.q.indexOf("How do you say")>=0;}).forEach(function(q){
+      var g=q.q.match(/How do you say '(.+)'\??/i);
+      if(g&&g[1].replace(/[^a-zA-Z]/g,'').length>3) allMC.push({type:'typed',q:"How do you say '"+g[1]+"'?",a:q.a,ph:q.ph,alt:[]});
+    });
+  });
+  B.queue=shuffle(allTyped.concat(allMC)).slice(0,10);
+  B.qi=0; B.answered=false; B.elapsed=0; B.penalties=0;
+  B.usedVowels=new Set(); B.revealedVowels=new Set(); B.wrongs=0; B.history=[];
+  setText('bossLvlName','⚔️ '+lv.id+' · El Jefe');
+  setText('bossPenalty','');
+  show('bossScreen'); renderBossQ(); startBossTimer();
+}
+
+function startBossTimer(){ clearInterval(B.timer); B.timer=setInterval(function(){B.elapsed++;updateBossClock();},1000); }
+
+function updateBossClock(){
+  var total=B.elapsed+B.penalties; var m=Math.floor(total/60); var s=total%60;
+  var e=el('bossTime'); e.textContent=m+':'+(s<10?'0':'')+s;
+  e.style.color=total>B.level.bossTarget?'#c94c4c':'#0a1a0a';
+}
+
+var VOWELS=['a','e','i','o','u','á','é','í','ó','ú'];
+
+function renderBossQ(){
+  var q=B.queue[B.qi]; B.answered=false; B.hintUsed=false;
+  B.usedVowels=new Set(); B.revealedVowels=new Set();
+  setText('bossQProg',(B.qi+1)+' / 10');
+  setText('bossQText',q.q);
+  el('bossProgBar').style.width=((B.qi/10)*100)+'%';
+  var inp=el('bossInput'); inp.value=''; inp.style.borderColor='#2a6a3a'; inp.disabled=false;
+  el('bossFb').style.display='none';
+  el('bossNextBtn').style.display='none';
+  el('bossHintWrap').style.display='block';
+  el('bossSubmitBtn').style.display='block';
+  setText('bossHintLives',save.lives);
+  renderVowelBtns();
+  setTimeout(function(){inp.focus();},80);
+}
+
+function renderVowelBtns(){
+  var wrap=el('vowelBtns'); wrap.innerHTML='';
+  VOWELS.forEach(function(v){
+    var used=B.usedVowels.has(v);
+    var b=document.createElement('button');
+    b.textContent=v.toUpperCase();
+    b.className='vowel-btn'+(used?' used':'');
+    if(!used&&!B.answered&&save.lives>0){
+      (function(vv){ b.addEventListener('click',function(){useVowelHint(vv);}); })(v);
+    }
+    wrap.appendChild(b);
+  });
+  setText('bossHintLives',save.lives);
+}
+
+function useVowelHint(vowel){
+  if(save.lives<=0||B.answered||B.usedVowels.has(vowel)) return;
+  B.usedVowels.add(vowel); B.revealedVowels.add(vowel);
+  save.lives=Math.max(0,save.lives-1); persist(); renderLives(); B.hintUsed=true;
+  var q=B.queue[B.qi]; var revealed='';
+  for(var i=0;i<q.a.length;i++){
+    var ch=q.a[i]; var cl=ch.toLowerCase();
+    revealed += B.revealedVowels.has(cl)?ch:(' .,!?-\''.indexOf(ch)>=0?ch:'_');
+  }
+  el('bossInput').value=revealed; renderVowelBtns();
+}
+
+function submitBossAnswer(){
+  if(B.answered) return;
+  var inp=el('bossInput'); var raw=inp.value.trim();
+  if(!raw){B.answered=true;B.penalties+=45;updateBossClock();dong();B.history.push({q:B.queue[B.qi].q,a:B.queue[B.qi].a,user:'',ok:false});showBossFb(false,B.queue[B.qi],raw,45);return;}
+  B.answered=true; inp.blur();
+  var q=B.queue[B.qi]; var norm=normalise(raw);
+  var ok=norm===normalise(q.a)||(q.alt||[]).map(normalise).indexOf(norm)>=0||fuzzy(norm,normalise(q.a));
+  inp.style.borderColor=ok?'#1a7a2a':'#c0392b'; inp.disabled=true;
+  B.history.push({q:q.q,a:q.a,user:raw,ok:ok});
+  if(!ok){B.penalties+=30;B.wrongs=(B.wrongs||0)+1;updateBossClock();dong();}else{ding();speakText(q.a);}
+  showBossFb(ok,q,raw,ok?0:30);
+}
+
+function showBossFb(ok,q,userAnswer,penalty){
+  B.answered=true;
+  el('bossFb').style.display='flex';
+  el('bossFbResult').style.color=ok?'#1a7a2a':'#c0392b';
+  setText('bossFbResult',ok?'✓ ¡Correcto! Rapid, Jim.':'✗ Incorrecto — keep going');
+  var ae=el('bossFbAns');
+  if(ok) ae.innerHTML='<span style="color:#1a7a2a;font-weight:700">'+q.a+'</span>';
+  else {
+    var diffHtml=diffHighlight(userAnswer,q.a);
+    ae.innerHTML=(userAnswer?'<span style="color:#c0392b;text-decoration:line-through;font-size:.85rem">'+userAnswer+'</span> → ':'')+diffHtml;
+    speakText(q.a);
+  }
+  setText('bossFbPh',q.ph?'/'+q.ph+'/':'');
+  setText('bossFbPenalty',penalty>0?'+'+penalty+'s penalty':'');
+  el('bossHintWrap').style.display='none';
+  el('bossSubmitBtn').style.display='none';
+  el('bossNextBtn').style.display='block';
+}
+
+function nextBossQ(){ B.qi++; if(B.qi>=B.queue.length) endBoss(); else renderBossQ(); }
+
+// ── END BOSS ──
+var BADGE_MEANINGS={
+  'A1':'Sound out. You have the basics — greetings, food, getting around. You can walk into that kitchen in Cádiz and not be a complete eejit. That\'s something.',
+  'A2':'Now we\'re talking. Real sentences, real conversations. You can introduce yourself, order food, talk about your life. Your Spanish family will actually be impressed.',
+  'B1':'Ah here. This is properly good Spanish. Tenses, opinions, asking questions — you can surprise people now. Go out and use it.',
+  'B2':'Legends only. Fluent. Idioms. The full shebang. You didn\'t come to Cádiz as a tourist — you came as yourself. Job done.',
+};
+
+function endBoss(){
+  clearInterval(B.timer);
+  var lv=B.level; var total=B.elapsed+B.penalties; var passed=total<=lv.bossTarget;
+  var m=Math.floor(total/60); var s=total%60;
+  var ts=m+':'+(s<10?'0':'')+s;
+  var tm=Math.floor(lv.bossTarget/60); var ts2=lv.bossTarget%60;
+  var tgt=tm+':'+(ts2<10?'0':'')+ts2;
+
+  var icon=el('bossResIcon'); icon.textContent=passed?lv.badge:'⚔️'; icon.style.fontSize=passed?'5rem':'3.5rem';
+  setText('bossResTitle', passed?lv.id+' · ¡Conseguido! · Earned!':lv.id+' · ¡Inténtalo de nuevo!');
+  setText('bossResTime', ts);
+  setHTML('bossResBreak','Objetivo · Target: <strong>'+tgt+'</strong><br>Penalizaciones · Penalties: <strong>+'+B.penalties+'s</strong><br>'+(passed?'✓ ¡Lo lograste! · You passed!':'✗ '+(total-lv.bossTarget)+'s por encima del objetivo'));
+  setText('bossResMsg', passed?(lv.bossPraise||'¡Fantástico! Sound out, Jim.'):"¡Casi! So close. Have another go — you\'ve got this.");
+  setText('bossResIrish', passed?(lv.badgeIrish+' · '+(lv.badgeIrishEn||'')):'Is fearr Español bhriste ná Béarla cliste.');
+
+  var wrap=el('bossResBtns'); wrap.innerHTML='';
+  // Build boss summary
+  var bSumDiv=el('loopSummaryBoss'); var bSumRows=el('bossSummaryRows');
+  if(bSumRows){
+    var bWrongs=(B.history||[]).filter(function(h){return !h.ok;});
+    if(bWrongs.length>0){
+      bSumRows.innerHTML='';
+      bWrongs.forEach(function(h){
+        var row=document.createElement('div');
+        row.className='sum-row';
+        var qLabel=h.q.replace(/^Write: /i,'').replace(/^How do you say /i,'').replace(/['"?]/g,'');
+        var diffHtml=diffHighlight(h.user,h.a);
+        row.innerHTML='<span class="sum-q">'+qLabel+'</span>'
+          +(h.user?'<span style="color:#c0392b;text-decoration:line-through;font-size:.78rem">'+h.user+'</span> → ':'<span style="color:#c0392b;font-size:.78rem">No answer → </span>')
+          +'<span style="font-weight:700">'+diffHtml+'</span>';
+        bSumRows.appendChild(row);
+      });
+      bSumDiv.style.display='block';
+    } else { bSumDiv.style.display='none'; }
+  }
+  if(passed){
+    var lvs=save.levels[lv.id]||{}; lvs.badge=true; save.levels[lv.id]=lvs; persist(); buildHome();
+    chime(); setTimeout(chime,900);
+    var nextLv=LEVELS[LEVELS.indexOf(lv)+1];
+    (function(nl,L){
+      if(nl){ mkBtn(wrap,'btn btn-p',nl.badge+' ¡Continúa! → '+nl.id+'<br><small>'+nl.name+'</small>',function(){showBadge(L,nl);}); }
+      else { mkBtn(wrap,'btn btn-p','🏆 ¡Completo!',function(){showBadge(L,null);}); }
+    })(nextLv,lv);
+  } else {
+    mkBtn(wrap,'btn btn-p','⚔️ Arís · Try again', startBoss);
+  }
+  mkBtn(wrap,'btn btn-s','← Inicio · Home', goHome);
+  show('bossResultsScreen');
+}
+
+// ── BADGE ──
+function showBadge(lv,nextLv){
+  chime();
+  setText('badgeBig',lv.badge);
+  setText('badgeLevel',lv.id+' · '+lv.name);
+  setText('badgeName','— '+lv.name+' —');
+  setText('badgeMeaning',BADGE_MEANINGS[lv.id]||'');
+  setText('badgeProverb',lv.badgeIrish?(lv.badgeIrish+(lv.badgeIrishEn?' · '+lv.badgeIrishEn:'')):'');
+  setText('badgeNext',nextLv?nextLv.badge+' '+nextLv.id+' · '+nextLv.name+' desbloqueado · unlocked':'🏆 ¡Has llegado al nivel máximo!');
+  var wrap=el('badgeBtns'); wrap.innerHTML='';
+  if(nextLv){
+    (function(nl){ mkBtn(wrap,'btn btn-p','¡Continúa! → '+nl.id+'<br><small>'+nl.name+'</small>',function(){openLevel(nl.id);}); })(nextLv);
+  } else {
+    mkBtn(wrap,'btn btn-p','🏆 Inicio · Home',goHome);
+  }
+  mkBtn(wrap,'btn btn-s','← Inicio · Home',goHome);
+  show('badgeScreen');
+}
+
+// ── LIVES SCREEN ──
+function showLivesScreen(backScreen){
+  _livesBack=backScreen||'homeScreen';
+  var list=el('livesLoopList'); list.innerHTML='';
+  LEVELS.forEach(function(lv){
+    var lvs=save.levels[lv.id]||{};
+    if(!lvs.loopsDone&&!lvs.badge) return;
+    var hdr=document.createElement('div');
+    hdr.style.cssText='font-family:var(--font-title);font-size:.75rem;color:#8a6010;font-weight:700;margin:10px 0 5px;';
+    hdr.textContent=(lvs.badge?lv.badge:'🌑')+' '+lv.id+' · '+lv.name;
+    list.appendChild(hdr);
+    lv.loops.forEach(function(loop,idx){
+      var done=(lvs.loopsDone||0)>idx; if(!done) return;
+      var stars=(lvs.loopStars||{})[idx]||0; var perfect=stars===5;
+      var row=document.createElement('div');
+      row.style.cssText='background:'+(perfect?'#fef5e8':'#fffdf8')+';border:1px solid '+(perfect?'#e8b87a':'#f0d8b0')+';border-radius:9px;padding:10px 13px;display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;cursor:pointer;';
+      row.innerHTML='<div><div style="font-size:.82rem;font-weight:600;">'+loop.name+'</div><div style="font-size:.66rem;color:#5a7a5a;">'+(perfect?'✓ Vida ganada aquí':'Replay for ★★★★★')+' </div></div>'
+        +'<div style="font-size:1rem;letter-spacing:2px;color:'+(perfect?'#e8822a':stars>=3?'#c0392b':'#e8c89a')+'">'+'★'.repeat(stars)+'☆'.repeat(5-stars)+'</div>';
+      (function(L,i){ row.addEventListener('click',function(){G.level=L;G.loopIdx=i;startLoop(i);}); })(lv,idx);
+      list.appendChild(row);
+    });
+  });
+  show('livesScreen');
+}
+
+// ── INIT ──
+function init() {
+  initState();
+  renderLives();
+  buildHome();
+  initTTSToggle();
+  initVoice();
+
+  btn('homeStartBtn',  handleStart);
+  btn('homeLevelsBtn', showLevels);
+  btn('homeLivesBtn',  function(){showLivesScreen('homeScreen');});
+  btn('levelsBackBtn', function(){show('homeScreen');});
+  btn('introStartBtn', startFirstLoop);
+  btn('introBackBtn',  goHome);
+  btn('gHomeBtn',      goHome);
+  btn('submitBtn',     submitTyped);
+  btn('hintBtn',       useHint);
+  btn('mcHintBtn',     useMCHint);
+  btn('btnNext',       nextQ);
+  btn('bossBeginBtn',  startBoss);
+  btn('bossLivesBtn',  function(){showLivesScreen('bossIntroScreen');});
+  btn('bossIntroBackBtn', goHome);
+  btn('bossSubmitBtn', submitBossAnswer);
+  btn('bossNextBtn',   nextBossQ);
+  btn('livesBackBtn',  function(){show(_livesBack);});
+
+  el('typedInput').addEventListener('keydown',function(e){if(e.key==='Enter')submitTyped();});
+  el('bossInput').addEventListener('keydown',function(e){if(e.key==='Enter')submitBossAnswer();});
+
+  show('homeScreen');
+}
+
+try { init(); } catch(e) {
+  document.body.style.cssText='background:#fff;padding:20px;font-family:monospace;';
+  document.body.innerHTML='<h2 style="color:#c00">ERROR:</h2><pre style="font-size:.75rem;color:#c00;white-space:pre-wrap">'+e.message+'\n\n'+(e.stack||'')+'</pre>';
+}
+</script>
+</body>
+</html>
